@@ -9,7 +9,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.util.Collection;
 
-final class NoopSpanExporter implements SpanExporter {
+final class NoopSpanExporter extends SpanExporter {
 
   private static final SpanExporter INSTANCE = new NoopSpanExporter();
 

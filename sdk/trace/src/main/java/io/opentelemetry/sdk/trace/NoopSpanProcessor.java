@@ -7,7 +7,7 @@ package io.opentelemetry.sdk.trace;
 
 import io.opentelemetry.context.Context;
 
-final class NoopSpanProcessor implements SpanProcessor {
+final class NoopSpanProcessor extends SpanProcessor {
   private static final NoopSpanProcessor INSTANCE = new NoopSpanProcessor();
 
   static SpanProcessor getInstance() {

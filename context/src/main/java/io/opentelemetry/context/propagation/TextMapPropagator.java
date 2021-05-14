@@ -41,7 +41,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * }</pre>
  */
 @ThreadSafe
-public interface TextMapPropagator {
+public abstract class TextMapPropagator {
 
   /**
    * Returns a {@link TextMapPropagator} which simply delegates injection and extraction to the
@@ -50,7 +50,7 @@ public interface TextMapPropagator {
    * <p>Invocation order of {@code TextMapPropagator#inject()} and {@code
    * TextMapPropagator#extract()} for registered trace propagators is undefined.
    */
-  static TextMapPropagator composite(TextMapPropagator... propagators) {
+  public static TextMapPropagator composite(TextMapPropagator... propagators) {
     return composite(Arrays.asList(propagators));
   }
 
@@ -61,8 +61,8 @@ public interface TextMapPropagator {
    * <p>Invocation order of {@code TextMapPropagator#inject()} and {@code
    * TextMapPropagator#extract()} for registered trace propagators is undefined.
    */
-  static TextMapPropagator composite(Iterable<TextMapPropagator> propagators) {
-    List<TextMapPropagator> propagatorsList = new ArrayList<>();
+  public static TextMapPropagator composite(Iterable<TextMapPropagator> propagators) {
+    List<TextMapPropagator> propagatorsList = new ArrayList<TextMapPropagator>();
     for (TextMapPropagator propagator : propagators) {
       propagatorsList.add(propagator);
     }
@@ -76,7 +76,7 @@ public interface TextMapPropagator {
   }
 
   /** Returns a {@link TextMapPropagator} which does no injection or extraction. */
-  static TextMapPropagator noop() {
+  public static TextMapPropagator noop() {
     return NoopTextMapPropagator.getInstance();
   }
 
@@ -97,7 +97,7 @@ public interface TextMapPropagator {
    *
    * @return the fields that will be used by this formatter.
    */
-  Collection<String> fields();
+  public abstract Collection<String> fields();
 
   /**
    * Injects data for downstream consumers, for example as HTTP headers. The carrier may be null to
@@ -109,7 +109,7 @@ public interface TextMapPropagator {
    * @param setter invoked for each propagation key to add or remove.
    * @param <C> carrier of propagation fields, such as an http request
    */
-  <C> void inject(Context context, @Nullable C carrier, TextMapSetter<C> setter);
+  public abstract <C> void inject(Context context, @Nullable C carrier, TextMapSetter<C> setter);
 
   /**
    * Extracts data from upstream. For example, from incoming http headers. The returned Context
@@ -124,5 +124,5 @@ public interface TextMapPropagator {
    * @param <C> the type of carrier of the propagation fields, such as an http request.
    * @return the {@code Context} containing the extracted data.
    */
-  <C> Context extract(Context context, @Nullable C carrier, TextMapGetter<C> getter);
+  public abstract <C> Context extract(Context context, @Nullable C carrier, TextMapGetter<C> getter);
 }

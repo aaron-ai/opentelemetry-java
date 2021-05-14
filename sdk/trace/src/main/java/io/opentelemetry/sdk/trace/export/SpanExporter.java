@@ -8,7 +8,6 @@ package io.opentelemetry.sdk.trace.export;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * <p>To export data this MUST be register to the {@code TracerSdk} using a {@link
  * SimpleSpanProcessor} or a {@code BatchSampledSpansProcessor}.
  */
-public interface SpanExporter extends Closeable {
+public abstract class SpanExporter {
 
   /**
    * Returns a {@link SpanExporter} which simply delegates all exports to the {@code exporters} in
@@ -31,7 +30,7 @@ public interface SpanExporter extends Closeable {
    * <p>Can be used to export to multiple backends using the same {@code SpanProcessor} like a
    * {@code SimpleSampledSpansProcessor} or a {@code BatchSampledSpansProcessor}.
    */
-  static SpanExporter composite(SpanExporter... exporters) {
+  public static SpanExporter composite(SpanExporter... exporters) {
     return composite(Arrays.asList(exporters));
   }
 
@@ -42,8 +41,8 @@ public interface SpanExporter extends Closeable {
    * <p>Can be used to export to multiple backends using the same {@code SpanProcessor} like a
    * {@code SimpleSampledSpansProcessor} or a {@code BatchSampledSpansProcessor}.
    */
-  static SpanExporter composite(Iterable<SpanExporter> exporters) {
-    List<SpanExporter> exportersList = new ArrayList<>();
+  public static SpanExporter composite(Iterable<SpanExporter> exporters) {
+    List<SpanExporter> exportersList = new ArrayList<SpanExporter>();
     for (SpanExporter exporter : exporters) {
       exportersList.add(exporter);
     }
@@ -64,7 +63,7 @@ public interface SpanExporter extends Closeable {
    * @param spans the collection of sampled Spans to be exported.
    * @return the result of the export, which is often an asynchronous operation.
    */
-  CompletableResultCode export(Collection<SpanData> spans);
+  public abstract CompletableResultCode export(Collection<SpanData> spans);
 
   /**
    * Exports the collection of sampled {@code Span}s that have not yet been exported. Note that
@@ -74,7 +73,7 @@ public interface SpanExporter extends Closeable {
    *
    * @return the result of the flush, which is often an asynchronous operation.
    */
-  CompletableResultCode flush();
+  public abstract CompletableResultCode flush();
 
   /**
    * Called when {@link SdkTracerProvider#shutdown()} is called, if this {@code SpanExporter} is
@@ -82,11 +81,10 @@ public interface SpanExporter extends Closeable {
    *
    * @return a {@link CompletableResultCode} which is completed when shutdown completes.
    */
-  CompletableResultCode shutdown();
+  public abstract CompletableResultCode shutdown();
 
   /** Closes this {@link SpanExporter}, releasing any resources. */
-  @Override
-  default void close() {
+  public void close() {
     shutdown().join(10, TimeUnit.SECONDS);
   }
 }

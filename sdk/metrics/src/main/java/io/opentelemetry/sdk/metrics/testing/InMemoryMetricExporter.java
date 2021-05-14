@@ -55,7 +55,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public final class InMemoryMetricExporter implements MetricExporter {
 
   // using LinkedBlockingQueue to avoid manual locks for thread-safe operations
-  private final Queue<MetricData> finishedMetricItems = new LinkedBlockingQueue<>();
+  private final Queue<MetricData> finishedMetricItems = new LinkedBlockingQueue<MetricData>();
   private boolean isStopped = false;
 
   private InMemoryMetricExporter() {}
@@ -75,7 +75,7 @@ public final class InMemoryMetricExporter implements MetricExporter {
    * @return a {@code List} of the finished {@code Metric}s.
    */
   public List<MetricData> getFinishedMetricItems() {
-    return Collections.unmodifiableList(new ArrayList<>(finishedMetricItems));
+    return Collections.unmodifiableList(new ArrayList<MetricData>(finishedMetricItems));
   }
 
   /**

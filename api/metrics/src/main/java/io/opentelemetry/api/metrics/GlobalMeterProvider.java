@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class GlobalMeterProvider {
   private static final Object mutex = new Object();
-  private static final AtomicReference<MeterProvider> globalMeterProvider = new AtomicReference<>();
+  private static final AtomicReference<MeterProvider> globalMeterProvider = new AtomicReference<MeterProvider>();
 
   private GlobalMeterProvider() {}
 

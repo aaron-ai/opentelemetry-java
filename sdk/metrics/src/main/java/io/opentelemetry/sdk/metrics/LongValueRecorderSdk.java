@@ -10,6 +10,7 @@ import io.opentelemetry.api.metrics.LongValueRecorder;
 import io.opentelemetry.api.metrics.LongValueRecorderBuilder;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.sdk.metrics.aggregator.AggregatorHandle;
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -83,7 +84,14 @@ final class LongValueRecorderSdk extends AbstractSynchronousInstrument
 
     @Override
     public LongValueRecorderSdk build() {
-      return buildInstrument(LongValueRecorderSdk::new);
+      return buildInstrument(
+          new BiFunction<InstrumentDescriptor, SynchronousInstrumentAccumulator<?>, LongValueRecorderSdk>() {
+            @Override
+            public LongValueRecorderSdk apply(InstrumentDescriptor instrumentDescriptor,
+                SynchronousInstrumentAccumulator<?> synchronousInstrumentAccumulator) {
+              return new LongValueRecorderSdk(instrumentDescriptor, synchronousInstrumentAccumulator);
+            }
+          });
     }
   }
 }

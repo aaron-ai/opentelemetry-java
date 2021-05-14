@@ -13,7 +13,6 @@ import io.opentelemetry.sdk.metrics.view.View;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Builder class for the {@link SdkMeterProvider}. Has fully functional default implementations of
@@ -23,7 +22,7 @@ public final class SdkMeterProviderBuilder {
 
   private Clock clock = SystemClock.getInstance();
   private Resource resource = Resource.getDefault();
-  private final Map<InstrumentSelector, View> instrumentSelectorViews = new HashMap<>();
+  private final Map<InstrumentSelector, View> instrumentSelectorViews = new HashMap<InstrumentSelector, View>();
 
   SdkMeterProviderBuilder() {}
 
@@ -34,7 +33,9 @@ public final class SdkMeterProviderBuilder {
    * @return this
    */
   public SdkMeterProviderBuilder setClock(Clock clock) {
-    Objects.requireNonNull(clock, "clock");
+    if (clock == null) {
+      throw new NullPointerException("clock");
+    }
     this.clock = clock;
     return this;
   }
@@ -46,7 +47,9 @@ public final class SdkMeterProviderBuilder {
    * @return this
    */
   public SdkMeterProviderBuilder setResource(Resource resource) {
-    Objects.requireNonNull(resource, "resource");
+    if (resource == null) {
+      throw new NullPointerException("resource");
+    }
     this.resource = resource;
     return this;
   }
@@ -76,8 +79,12 @@ public final class SdkMeterProviderBuilder {
    * @since 1.1.0
    */
   public SdkMeterProviderBuilder registerView(InstrumentSelector selector, View view) {
-    Objects.requireNonNull(selector, "selector");
-    Objects.requireNonNull(view, "view");
+    if (selector == null) {
+      throw new NullPointerException("selector");
+    }
+    if (view == null) {
+      throw new NullPointerException("view");
+    }
     instrumentSelectorViews.put(selector, view);
     return this;
   }
@@ -107,7 +114,10 @@ public final class SdkMeterProviderBuilder {
    */
   public SdkMeterProvider build() {
     ViewRegistryBuilder viewRegistryBuilder = ViewRegistry.builder();
-    instrumentSelectorViews.forEach(viewRegistryBuilder::addView);
+    for (Map.Entry<InstrumentSelector, View> entry : instrumentSelectorViews
+        .entrySet()) {
+      viewRegistryBuilder.addView(entry.getKey(), entry.getValue());
+    }
     ViewRegistry viewRegistry = viewRegistryBuilder.build();
     return new SdkMeterProvider(clock, resource, viewRegistry);
   }

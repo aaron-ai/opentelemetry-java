@@ -9,14 +9,13 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implementation of the {@code SpanProcessor} that simply forwards all received events to a list of
  * {@code SpanProcessor}s.
  */
-final class MultiSpanProcessor implements SpanProcessor {
+final class MultiSpanProcessor extends SpanProcessor {
   private final List<SpanProcessor> spanProcessorsStart;
   private final List<SpanProcessor> spanProcessorsEnd;
   private final List<SpanProcessor> spanProcessorsAll;
@@ -30,8 +29,11 @@ final class MultiSpanProcessor implements SpanProcessor {
    * @throws NullPointerException if the {@code spanProcessorList} is {@code null}.
    */
   static SpanProcessor create(List<SpanProcessor> spanProcessorList) {
+    if (spanProcessorList == null) {
+      throw new NullPointerException("spanProcessorList");
+    }
     return new MultiSpanProcessor(
-        new ArrayList<>(Objects.requireNonNull(spanProcessorList, "spanProcessorList")));
+        new ArrayList<SpanProcessor>(spanProcessorList));
   }
 
   @Override
@@ -63,7 +65,7 @@ final class MultiSpanProcessor implements SpanProcessor {
     if (isShutdown.getAndSet(true)) {
       return CompletableResultCode.ofSuccess();
     }
-    List<CompletableResultCode> results = new ArrayList<>(spanProcessorsAll.size());
+    List<CompletableResultCode> results = new ArrayList<CompletableResultCode>(spanProcessorsAll.size());
     for (SpanProcessor spanProcessor : spanProcessorsAll) {
       results.add(spanProcessor.shutdown());
     }
@@ -72,7 +74,7 @@ final class MultiSpanProcessor implements SpanProcessor {
 
   @Override
   public CompletableResultCode forceFlush() {
-    List<CompletableResultCode> results = new ArrayList<>(spanProcessorsAll.size());
+    List<CompletableResultCode> results = new ArrayList<CompletableResultCode>(spanProcessorsAll.size());
     for (SpanProcessor spanProcessor : spanProcessorsAll) {
       results.add(spanProcessor.forceFlush());
     }
@@ -81,8 +83,8 @@ final class MultiSpanProcessor implements SpanProcessor {
 
   private MultiSpanProcessor(List<SpanProcessor> spanProcessors) {
     this.spanProcessorsAll = spanProcessors;
-    this.spanProcessorsStart = new ArrayList<>(spanProcessorsAll.size());
-    this.spanProcessorsEnd = new ArrayList<>(spanProcessorsAll.size());
+    this.spanProcessorsStart = new ArrayList<SpanProcessor>(spanProcessorsAll.size());
+    this.spanProcessorsEnd = new ArrayList<SpanProcessor>(spanProcessorsAll.size());
     for (SpanProcessor spanProcessor : spanProcessorsAll) {
       if (spanProcessor.isStartRequired()) {
         spanProcessorsStart.add(spanProcessor);

@@ -7,8 +7,8 @@ package io.opentelemetry.api.common;
 
 import static io.opentelemetry.api.common.ArrayBackedAttributes.sortAndFilterToAttributes;
 
+import io.opentelemetry.api.internal.BiConsumer;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -30,30 +30,30 @@ import javax.annotation.concurrent.Immutable;
  */
 @SuppressWarnings("rawtypes")
 @Immutable
-public interface Attributes {
+public abstract class Attributes {
 
   /** Returns the value for the given {@link AttributeKey}, or {@code null} if not found. */
-  <T> T get(AttributeKey<T> key);
+  public abstract <T> T get(AttributeKey<T> key);
 
   /** Iterates over all the key-value pairs of attributes contained by this instance. */
-  void forEach(BiConsumer<? super AttributeKey<?>, ? super Object> consumer);
+  public abstract void forEach(BiConsumer<? super AttributeKey<?>, ? super Object> consumer);
 
   /** The number of attributes contained in this. */
-  int size();
+  public abstract int size();
 
   /** Whether there are any attributes contained in this. */
-  boolean isEmpty();
+  public abstract boolean isEmpty();
 
   /** Returns a read-only view of this {@link Attributes} as a {@link Map}. */
-  Map<AttributeKey<?>, Object> asMap();
+  public abstract Map<AttributeKey<?>, Object> asMap();
 
   /** Returns a {@link Attributes} instance with no attributes. */
-  static Attributes empty() {
+  public static Attributes empty() {
     return ArrayBackedAttributes.EMPTY;
   }
 
   /** Returns a {@link Attributes} instance with a single key-value pair. */
-  static <T> Attributes of(AttributeKey<T> key, T value) {
+  public static <T> Attributes of(AttributeKey<T> key, T value) {
     return sortAndFilterToAttributes(key, value);
   }
 
@@ -61,7 +61,7 @@ public interface Attributes {
    * Returns a {@link Attributes} instance with two key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static <T, U> Attributes of(AttributeKey<T> key1, T value1, AttributeKey<U> key2, U value2) {
+  public static <T, U> Attributes of(AttributeKey<T> key1, T value1, AttributeKey<U> key2, U value2) {
     return sortAndFilterToAttributes(key1, value1, key2, value2);
   }
 
@@ -69,7 +69,7 @@ public interface Attributes {
    * Returns a {@link Attributes} instance with three key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static <T, U, V> Attributes of(
+  public static <T, U, V> Attributes of(
       AttributeKey<T> key1,
       T value1,
       AttributeKey<U> key2,
@@ -83,7 +83,7 @@ public interface Attributes {
    * Returns a {@link Attributes} instance with four key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static <T, U, V, W> Attributes of(
+  public static <T, U, V, W> Attributes of(
       AttributeKey<T> key1,
       T value1,
       AttributeKey<U> key2,
@@ -99,7 +99,7 @@ public interface Attributes {
    * Returns a {@link Attributes} instance with five key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static <T, U, V, W, X> Attributes of(
+  public static <T, U, V, W, X> Attributes of(
       AttributeKey<T> key1,
       T value1,
       AttributeKey<U> key2,
@@ -122,7 +122,7 @@ public interface Attributes {
    * Returns a {@link Attributes} instance with the given key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static <T, U, V, W, X, Y> Attributes of(
+  public static <T, U, V, W, X, Y> Attributes of(
       AttributeKey<T> key1,
       T value1,
       AttributeKey<U> key2,
@@ -145,7 +145,7 @@ public interface Attributes {
   }
 
   /** Returns a new {@link AttributesBuilder} instance for creating arbitrary {@link Attributes}. */
-  static AttributesBuilder builder() {
+  public static AttributesBuilder builder() {
     return new ArrayBackedAttributesBuilder();
   }
 
@@ -153,5 +153,5 @@ public interface Attributes {
    * Returns a new {@link AttributesBuilder} instance populated with the data of this {@link
    * Attributes}.
    */
-  AttributesBuilder toBuilder();
+  public abstract AttributesBuilder toBuilder();
 }

@@ -30,7 +30,7 @@ final class DefaultTracer implements Tracer {
   private DefaultTracer() {}
 
   // Noop implementation of Span.Builder.
-  private static final class NoopSpanBuilder implements SpanBuilder {
+  private static final class NoopSpanBuilder extends SpanBuilder {
     static NoopSpanBuilder create() {
       return new NoopSpanBuilder();
     }

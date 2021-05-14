@@ -19,17 +19,17 @@ import javax.annotation.concurrent.Immutable;
  * class.
  */
 @Immutable
-public interface SpanData {
+public abstract class SpanData {
 
   /** Returns the {@link SpanContext} of the Span. */
-  SpanContext getSpanContext();
+  public abstract SpanContext getSpanContext();
 
   /**
    * Gets the trace id for this span.
    *
    * @return the trace id.
    */
-  default String getTraceId() {
+  public String getTraceId() {
     return getSpanContext().getTraceId();
   }
 
@@ -38,7 +38,7 @@ public interface SpanData {
    *
    * @return the span id.
    */
-  default String getSpanId() {
+  public String getSpanId() {
     return getSpanContext().getSpanId();
   }
 
@@ -46,7 +46,7 @@ public interface SpanData {
    * Returns the parent {@link SpanContext}. If the span is a root span, the {@link SpanContext}
    * returned will be invalid.
    */
-  SpanContext getParentSpanContext();
+  public abstract SpanContext getParentSpanContext();
 
   /**
    * Returns the parent {@code SpanId}. If the {@code Span} is a root {@code Span}, the SpanId
@@ -54,7 +54,7 @@ public interface SpanData {
    *
    * @return the parent {@code SpanId} or an invalid SpanId if this is a root {@code Span}.
    */
-  default String getParentSpanId() {
+  public String getParentSpanId() {
     return getParentSpanContext().getSpanId();
   }
 
@@ -63,7 +63,7 @@ public interface SpanData {
    *
    * @return the resource of this {@code Span}.
    */
-  Resource getResource();
+  public abstract Resource getResource();
 
   /**
    * Returns the instrumentation library specified when creating the tracer which produced this
@@ -71,70 +71,70 @@ public interface SpanData {
    *
    * @return an instance of {@link InstrumentationLibraryInfo}
    */
-  InstrumentationLibraryInfo getInstrumentationLibraryInfo();
+  public abstract InstrumentationLibraryInfo getInstrumentationLibraryInfo();
 
   /**
    * Returns the name of this {@code Span}.
    *
    * @return the name of this {@code Span}.
    */
-  String getName();
+  public abstract String getName();
 
   /**
    * Returns the kind of this {@code Span}.
    *
    * @return the kind of this {@code Span}.
    */
-  SpanKind getKind();
+  public abstract SpanKind getKind();
 
   /**
    * Returns the start epoch timestamp in nanos of this {@code Span}.
    *
    * @return the start epoch timestamp in nanos of this {@code Span}.
    */
-  long getStartEpochNanos();
+  public abstract long getStartEpochNanos();
 
   /**
    * Returns the attributes recorded for this {@code Span}.
    *
    * @return the attributes recorded for this {@code Span}.
    */
-  Attributes getAttributes();
+  public abstract Attributes getAttributes();
 
   /**
    * Returns the timed events recorded for this {@code Span}.
    *
    * @return the timed events recorded for this {@code Span}.
    */
-  List<EventData> getEvents();
+  public abstract List<EventData> getEvents();
 
   /**
    * Returns links recorded for this {@code Span}.
    *
    * @return links recorded for this {@code Span}.
    */
-  List<LinkData> getLinks();
+  public abstract List<LinkData> getLinks();
 
   /**
    * Returns the {@code Status}.
    *
    * @return the {@code Status}.
    */
-  StatusData getStatus();
+  public abstract StatusData getStatus();
 
   /**
    * Returns the end epoch timestamp in nanos of this {@code Span}.
    *
    * @return the end epoch timestamp in nanos of this {@code Span}.
    */
-  long getEndEpochNanos();
+  public abstract long getEndEpochNanos();
 
   /**
    * Returns whether this Span has already been ended.
    *
    * @return {@code true} if the span has already been ended, {@code false} if not.
    */
-  boolean hasEnded();
+  public abstract boolean hasEnded();
 
   /**
    * The total number of {@link EventData} events that were recorded on this span. This number may
@@ -144,7 +144,7 @@ public interface SpanData {
    *
    * @return The total number of events recorded on this span.
    */
-  int getTotalRecordedEvents();
+  public abstract int getTotalRecordedEvents();
 
   /**
    * The total number of {@link LinkData} links that were recorded on this span. This number may be
@@ -153,7 +153,7 @@ public interface SpanData {
    *
    * @return The total number of links recorded on this span.
    */
-  int getTotalRecordedLinks();
+  public abstract int getTotalRecordedLinks();
 
   /**
    * The total number of attributes that were recorded on this span. This number may be larger than
@@ -162,5 +162,5 @@ public interface SpanData {
    *
    * @return The total number of attributes on this span.
    */
-  int getTotalAttributeCount();
+  public abstract int getTotalAttributeCount();
 }

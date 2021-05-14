@@ -7,6 +7,7 @@ package io.opentelemetry.sdk.metrics;
 
 import io.opentelemetry.api.metrics.LongSumObserver;
 import io.opentelemetry.api.metrics.LongSumObserverBuilder;
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -41,7 +42,15 @@ final class LongSumObserverSdk extends AbstractAsynchronousInstrument implements
 
     @Override
     public LongSumObserverSdk build() {
-      return buildInstrument(LongSumObserverSdk::new);
+      return buildInstrument(
+          new BiFunction<InstrumentDescriptor, AsynchronousInstrumentAccumulator, LongSumObserverSdk>() {
+            @Override
+            public LongSumObserverSdk apply(InstrumentDescriptor instrumentDescriptor,
+                AsynchronousInstrumentAccumulator asynchronousInstrumentAccumulator) {
+              return new LongSumObserverSdk(instrumentDescriptor, asynchronousInstrumentAccumulator);
+            }
+          });
+
     }
   }
 }

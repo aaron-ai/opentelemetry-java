@@ -5,10 +5,10 @@
 
 package io.opentelemetry.sdk.metrics;
 
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
-import java.util.function.BiFunction;
 
 abstract class AbstractSynchronousInstrumentBuilder<
         B extends AbstractSynchronousInstrumentBuilder<?>>

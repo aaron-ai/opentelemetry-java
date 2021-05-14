@@ -20,8 +20,8 @@ dependencies {
 
     testAnnotationProcessor("com.google.auto.value:auto-value")
 
+    implementation("com.google.guava:guava")
     testImplementation(project(":sdk:testing"))
-    testImplementation("com.google.guava:guava")
 }
 
 sourceSets {

@@ -6,9 +6,7 @@
 package io.opentelemetry.sdk.trace.export;
 
 import static io.opentelemetry.api.internal.Utils.checkArgument;
-import static java.util.Objects.requireNonNull;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /** Builder class for {@link BatchSpanProcessor}. */
@@ -21,7 +19,7 @@ public final class BatchSpanProcessorBuilder {
   // Visible for testing
   static final int DEFAULT_MAX_EXPORT_BATCH_SIZE = 512;
   // Visible for testing
-  static final int DEFAULT_EXPORT_TIMEOUT_MILLIS = 30_000;
+  static final int DEFAULT_EXPORT_TIMEOUT_MILLIS = 30000;
 
   private final SpanExporter spanExporter;
   private long scheduleDelayNanos = TimeUnit.MILLISECONDS.toNanos(DEFAULT_SCHEDULE_DELAY_MILLIS);
@@ -30,7 +28,10 @@ public final class BatchSpanProcessorBuilder {
   private long exporterTimeoutNanos = TimeUnit.MILLISECONDS.toNanos(DEFAULT_EXPORT_TIMEOUT_MILLIS);
 
   BatchSpanProcessorBuilder(SpanExporter spanExporter) {
-    this.spanExporter = requireNonNull(spanExporter, "spanExporter");
+    if (spanExporter == null) {
+      throw new NullPointerException("spanExporter");
+    }
+    this.spanExporter = spanExporter;
   }
 
   // TODO: Consider to add support for constant Attributes and/or Resource.
@@ -40,7 +41,9 @@ public final class BatchSpanProcessorBuilder {
    * DEFAULT_SCHEDULE_DELAY_MILLIS}ms.
    */
   public BatchSpanProcessorBuilder setScheduleDelay(long delay, TimeUnit unit) {
-    requireNonNull(unit, "unit");
+    if (unit == null) {
+      throw new NullPointerException("unit");
+    }
     checkArgument(delay >= 0, "delay must be non-negative");
     scheduleDelayNanos = unit.toNanos(delay);
     return this;
@@ -50,10 +53,13 @@ public final class BatchSpanProcessorBuilder {
    * Sets the delay interval between two consecutive exports. If unset, defaults to {@value
    * DEFAULT_SCHEDULE_DELAY_MILLIS}ms.
    */
-  public BatchSpanProcessorBuilder setScheduleDelay(Duration delay) {
-    requireNonNull(delay, "delay");
-    return setScheduleDelay(delay.toNanos(), TimeUnit.NANOSECONDS);
-  }
+  // Block for Java 6
+//  public BatchSpanProcessorBuilder setScheduleDelay(Duration delay) {
+//    if (delay == null) {
+//      throw new NullPointerException("delay");
+//    }
+//    return setScheduleDelay(delay.toNanos(), TimeUnit.NANOSECONDS);
+//  }
 
   // Visible for testing
   long getScheduleDelayNanos() {
@@ -65,7 +71,9 @@ public final class BatchSpanProcessorBuilder {
    * defaults to {@value DEFAULT_EXPORT_TIMEOUT_MILLIS}ms.
    */
   public BatchSpanProcessorBuilder setExporterTimeout(long timeout, TimeUnit unit) {
-    requireNonNull(unit, "unit");
+    if (unit == null) {
+      throw new NullPointerException("unit");
+    }
     checkArgument(timeout >= 0, "timeout must be non-negative");
     exporterTimeoutNanos = unit.toNanos(timeout);
     return this;
@@ -75,10 +83,13 @@ public final class BatchSpanProcessorBuilder {
    * Sets the maximum time an export will be allowed to run before being cancelled. If unset,
    * defaults to {@value DEFAULT_EXPORT_TIMEOUT_MILLIS}ms.
    */
-  public BatchSpanProcessorBuilder setExporterTimeout(Duration timeout) {
-    requireNonNull(timeout, "timeout");
-    return setExporterTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS);
-  }
+  // Block for Java 6
+//  public BatchSpanProcessorBuilder setExporterTimeout(Duration timeout) {
+//    if (timeout == null) {
+//      throw new NullPointerException("timeout");
+//    }
+//    return setExporterTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS);
+//  }
 
   // Visible for testing
   long getExporterTimeoutNanos() {

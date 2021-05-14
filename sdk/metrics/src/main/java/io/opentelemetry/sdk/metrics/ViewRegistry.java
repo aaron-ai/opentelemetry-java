@@ -34,11 +34,14 @@ final class ViewRegistry {
   private final EnumMap<InstrumentType, LinkedHashMap<Pattern, View>> configuration;
 
   ViewRegistry(EnumMap<InstrumentType, LinkedHashMap<Pattern, View>> configuration) {
-    this.configuration = new EnumMap<>(InstrumentType.class);
+    this.configuration = new EnumMap<InstrumentType, LinkedHashMap<Pattern, View>>(InstrumentType.class);
     // make a copy for safety
-    configuration.forEach(
-        (instrumentType, patternViewLinkedHashMap) ->
-            this.configuration.put(instrumentType, new LinkedHashMap<>(patternViewLinkedHashMap)));
+    for (Map.Entry<InstrumentType, LinkedHashMap<Pattern, View>> entry : configuration
+        .entrySet()) {
+      final InstrumentType instrumentType = entry.getKey();
+      final LinkedHashMap<Pattern, View> patternViewLinkedHashMap = entry.getValue();
+      this.configuration.put(instrumentType, new LinkedHashMap<Pattern, View>(patternViewLinkedHashMap));
+    }
   }
 
   static ViewRegistryBuilder builder() {

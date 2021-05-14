@@ -14,13 +14,13 @@ import javax.annotation.concurrent.Immutable;
  * whether a {@code Span} should be traced.
  */
 @Immutable
-public interface TraceFlags {
+public abstract class TraceFlags {
   /**
    * Returns the length of the lowercase hex (base16) representation of the {@link TraceFlags}.
    *
    * @return the length of the lowercase hex (base16) representation of the {@link TraceFlags}.
    */
-  static int getLength() {
+  public static int getLength() {
     return ImmutableTraceFlags.HEX_LENGTH;
   }
 
@@ -29,7 +29,7 @@ public interface TraceFlags {
    *
    * @return the default (with all flag bits off) byte representation of the {@link TraceFlags}.
    */
-  static TraceFlags getDefault() {
+  public static TraceFlags getDefault() {
     return ImmutableTraceFlags.DEFAULT;
   }
 
@@ -40,7 +40,7 @@ public interface TraceFlags {
    * @return the lowercase hex (base16) representation of the {@link TraceFlags} with the sampling
    *     flag bit on.
    */
-  static TraceFlags getSampled() {
+  public static TraceFlags getSampled() {
     return ImmutableTraceFlags.SAMPLED;
   }
 
@@ -53,7 +53,7 @@ public interface TraceFlags {
    * @param srcOffset the offset int buffer.
    * @return the {@link TraceFlags} converted from the given lowercase hex (base16) representation.
    */
-  static TraceFlags fromHex(CharSequence src, int srcOffset) {
+  public static TraceFlags fromHex(CharSequence src, int srcOffset) {
     return ImmutableTraceFlags.fromHex(src, srcOffset);
   }
 
@@ -63,7 +63,7 @@ public interface TraceFlags {
    * @param traceFlagsByte the byte representation of the {@link TraceFlags}.
    * @return the {@link TraceFlags} converted from the given byte representation.
    */
-  static TraceFlags fromByte(byte traceFlagsByte) {
+  public static TraceFlags fromByte(byte traceFlagsByte) {
     return ImmutableTraceFlags.fromByte(traceFlagsByte);
   }
 
@@ -74,19 +74,19 @@ public interface TraceFlags {
    * @return {@code true} if the sampling bit is on for this {@link TraceFlags}, otherwise {@code *
    *     false}.
    */
-  boolean isSampled();
+  public abstract boolean isSampled();
 
   /**
    * Returns the lowercase hex (base16) representation of this {@link TraceFlags}.
    *
    * @return the byte representation of the {@link TraceFlags}.
    */
-  String asHex();
+  public abstract String asHex();
 
   /**
    * Returns the byte representation of this {@link TraceFlags}.
    *
    * @return the byte representation of the {@link TraceFlags}.
    */
-  byte asByte();
+  public abstract byte asByte();
 }

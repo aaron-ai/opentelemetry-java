@@ -7,6 +7,7 @@ package io.opentelemetry.api.trace.propagation;
 
 import static io.opentelemetry.api.internal.Utils.checkArgument;
 
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.api.internal.OtelEncodingUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -38,7 +39,7 @@ import javax.annotation.concurrent.Immutable;
  * designed to support all the data propagated via W3C propagation natively.
  */
 @Immutable
-public final class W3CTraceContextPropagator implements TextMapPropagator {
+public final class W3CTraceContextPropagator extends TextMapPropagator {
   private static final Logger logger = Logger.getLogger(W3CTraceContextPropagator.class.getName());
 
   static final String TRACE_PARENT = "traceparent";
@@ -71,7 +72,7 @@ public final class W3CTraceContextPropagator implements TextMapPropagator {
 
   static {
     // A valid version is 1 byte representing an 8-bit unsigned integer, version ff is invalid.
-    VALID_VERSIONS = new HashSet<>();
+    VALID_VERSIONS = new HashSet<String>();
     for (int i = 0; i < 255; i++) {
       String version = Long.toHexString(i);
       if (version.length() < 2) {
@@ -136,14 +137,17 @@ public final class W3CTraceContextPropagator implements TextMapPropagator {
       // No need to add an empty "tracestate" header.
       return;
     }
-    StringBuilder stringBuilder = new StringBuilder(TRACESTATE_MAX_SIZE);
-    traceState.forEach(
-        (key, value) -> {
-          if (stringBuilder.length() != 0) {
-            stringBuilder.append(TRACESTATE_ENTRY_DELIMITER);
-          }
-          stringBuilder.append(key).append(TRACESTATE_KEY_VALUE_DELIMITER).append(value);
-        });
+    final StringBuilder stringBuilder = new StringBuilder(TRACESTATE_MAX_SIZE);
+
+    traceState.forEach(new BiConsumer<String, String>() {
+      @Override
+      public void accept(String key, String value) {
+        if (stringBuilder.length() != 0) {
+          stringBuilder.append(TRACESTATE_ENTRY_DELIMITER);
+        }
+        stringBuilder.append(key).append(TRACESTATE_KEY_VALUE_DELIMITER).append(value);
+      }
+    });
     setter.set(carrier, TRACE_STATE, stringBuilder.toString());
   }
 

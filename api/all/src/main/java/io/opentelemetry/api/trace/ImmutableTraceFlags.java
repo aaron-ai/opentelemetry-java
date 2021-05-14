@@ -6,11 +6,10 @@
 package io.opentelemetry.api.trace;
 
 import io.opentelemetry.api.internal.OtelEncodingUtils;
-import java.util.Objects;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-final class ImmutableTraceFlags implements TraceFlags {
+final class ImmutableTraceFlags extends TraceFlags {
   private static final ImmutableTraceFlags[] INSTANCES = buildInstances();
   // Bit to represent whether trace is sampled or not.
   private static final byte SAMPLED_BIT = 0x01;
@@ -23,14 +22,16 @@ final class ImmutableTraceFlags implements TraceFlags {
   private final byte byteRep;
 
   // Implementation of the TraceFlags.fromHex().
-  static ImmutableTraceFlags fromHex(CharSequence src, int srcOffset) {
-    Objects.requireNonNull(src, "src");
+  public static ImmutableTraceFlags fromHex(CharSequence src, int srcOffset) {
+    if (src == null) {
+      throw new NullPointerException("src");
+    }
     return fromByte(
         OtelEncodingUtils.byteFromBase16(src.charAt(srcOffset), src.charAt(srcOffset + 1)));
   }
 
   // Implementation of the TraceFlags.fromByte().
-  static ImmutableTraceFlags fromByte(byte traceFlagsByte) {
+ public static ImmutableTraceFlags fromByte(byte traceFlagsByte) {
     // Equivalent with Byte.toUnsignedInt(), but cannot use it because of Android.
     return INSTANCES[traceFlagsByte & 255];
   }

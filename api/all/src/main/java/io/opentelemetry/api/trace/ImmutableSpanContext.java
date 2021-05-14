@@ -10,7 +10,7 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable
 @AutoValue
-abstract class ImmutableSpanContext implements SpanContext {
+abstract class ImmutableSpanContext extends SpanContext {
 
   static final SpanContext INVALID =
       createInternal(

@@ -9,6 +9,7 @@ import static io.opentelemetry.proto.metrics.v1.AggregationTemporality.AGGREGATI
 import static io.opentelemetry.proto.metrics.v1.AggregationTemporality.AGGREGATION_TEMPORALITY_DELTA;
 import static io.opentelemetry.proto.metrics.v1.AggregationTemporality.AGGREGATION_TEMPORALITY_UNSPECIFIED;
 
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.proto.common.v1.StringKeyValue;
 import io.opentelemetry.proto.metrics.v1.AggregationTemporality;
@@ -53,11 +54,11 @@ public final class MetricAdapter {
   public static List<ResourceMetrics> toProtoResourceMetrics(Collection<MetricData> metricData) {
     Map<Resource, Map<InstrumentationLibraryInfo, List<Metric>>> resourceAndLibraryMap =
         groupByResourceAndLibrary(metricData);
-    List<ResourceMetrics> resourceMetrics = new ArrayList<>(resourceAndLibraryMap.size());
+    List<ResourceMetrics> resourceMetrics = new ArrayList<ResourceMetrics>(resourceAndLibraryMap.size());
     for (Map.Entry<Resource, Map<InstrumentationLibraryInfo, List<Metric>>> entryResource :
         resourceAndLibraryMap.entrySet()) {
       List<InstrumentationLibraryMetrics> instrumentationLibraryMetrics =
-          new ArrayList<>(entryResource.getValue().size());
+          new ArrayList<InstrumentationLibraryMetrics>(entryResource.getValue().size());
       for (Map.Entry<InstrumentationLibraryInfo, List<Metric>> entryLibrary :
           entryResource.getValue().entrySet()) {
         instrumentationLibraryMetrics.add(
@@ -78,7 +79,7 @@ public final class MetricAdapter {
 
   private static Map<Resource, Map<InstrumentationLibraryInfo, List<Metric>>>
       groupByResourceAndLibrary(Collection<MetricData> metricDataList) {
-    Map<Resource, Map<InstrumentationLibraryInfo, List<Metric>>> result = new HashMap<>();
+    Map<Resource, Map<InstrumentationLibraryInfo, List<Metric>>> result = new HashMap<Resource, Map<InstrumentationLibraryInfo, List<Metric>>>();
     for (MetricData metricData : metricDataList) {
       if (metricData.isEmpty()) {
         // If no points available then ignore.
@@ -89,12 +90,16 @@ public final class MetricAdapter {
       Map<InstrumentationLibraryInfo, List<Metric>> libraryInfoListMap =
           result.get(metricData.getResource());
       if (libraryInfoListMap == null) {
-        libraryInfoListMap = new HashMap<>();
+        libraryInfoListMap = new HashMap<InstrumentationLibraryInfo, List<Metric>>();
         result.put(resource, libraryInfoListMap);
       }
-      List<Metric> metricList =
-          libraryInfoListMap.computeIfAbsent(
-              metricData.getInstrumentationLibraryInfo(), k -> new ArrayList<>());
+      final InstrumentationLibraryInfo libraryInfo = metricData
+          .getInstrumentationLibraryInfo();
+      List<Metric> metricList = libraryInfoListMap.get(libraryInfo);
+      if (metricList == null) {
+        metricList = new ArrayList<Metric>();
+        libraryInfoListMap.put(libraryInfo, metricList);
+      }
       metricList.add(toProtoMetric(metricData));
     }
     return result;
@@ -176,7 +181,7 @@ public final class MetricAdapter {
   }
 
   static List<IntDataPoint> toIntDataPoints(Collection<LongPointData> points) {
-    List<IntDataPoint> result = new ArrayList<>(points.size());
+    List<IntDataPoint> result = new ArrayList<IntDataPoint>(points.size());
     for (LongPointData longPoint : points) {
       IntDataPoint.Builder builder =
           IntDataPoint.newBuilder()
@@ -193,7 +198,7 @@ public final class MetricAdapter {
   }
 
   static Collection<DoubleDataPoint> toDoubleDataPoints(Collection<DoublePointData> points) {
-    List<DoubleDataPoint> result = new ArrayList<>(points.size());
+    List<DoubleDataPoint> result = new ArrayList<DoubleDataPoint>(points.size());
     for (DoublePointData doublePoint : points) {
       DoubleDataPoint.Builder builder =
           DoubleDataPoint.newBuilder()
@@ -211,7 +216,7 @@ public final class MetricAdapter {
 
   static List<DoubleSummaryDataPoint> toSummaryDataPoints(
       Collection<DoubleSummaryPointData> points) {
-    List<DoubleSummaryDataPoint> result = new ArrayList<>(points.size());
+    List<DoubleSummaryDataPoint> result = new ArrayList<DoubleSummaryDataPoint>(points.size());
     for (DoubleSummaryPointData doubleSummaryPoint : points) {
       DoubleSummaryDataPoint.Builder builder =
           DoubleSummaryDataPoint.newBuilder()
@@ -241,7 +246,7 @@ public final class MetricAdapter {
 
   static Collection<DoubleHistogramDataPoint> toDoubleHistogramDataPoints(
       Collection<DoubleHistogramPointData> points) {
-    List<DoubleHistogramDataPoint> result = new ArrayList<>(points.size());
+    List<DoubleHistogramDataPoint> result = new ArrayList<DoubleHistogramDataPoint>(points.size());
     for (DoubleHistogramPointData doubleHistogramPoint : points) {
       DoubleHistogramDataPoint.Builder builder =
           DoubleHistogramDataPoint.newBuilder()
@@ -268,10 +273,13 @@ public final class MetricAdapter {
     if (labels.isEmpty()) {
       return Collections.emptyList();
     }
-    final List<StringKeyValue> result = new ArrayList<>(labels.size());
-    labels.forEach(
-        (key, value) ->
-            result.add(StringKeyValue.newBuilder().setKey(key).setValue(value).build()));
+    final List<StringKeyValue> result = new ArrayList<StringKeyValue>(labels.size());
+    labels.forEach(new BiConsumer<String, String>() {
+      @Override
+      public void accept(String key, String value) {
+        result.add(StringKeyValue.newBuilder().setKey(key).setValue(value).build());
+      }
+    });
     return result;
   }
 

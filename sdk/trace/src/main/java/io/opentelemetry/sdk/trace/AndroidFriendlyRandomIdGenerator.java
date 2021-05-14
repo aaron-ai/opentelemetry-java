@@ -13,8 +13,8 @@ import java.util.Random;
  * {@link IdGenerator} instance that doesn't use {@link java.util.concurrent.ThreadLocalRandom},
  * which is broken on most versions of Android (it uses the same seed everytime it starts up).
  */
-enum AndroidFriendlyRandomIdGenerator implements IdGenerator {
-  INSTANCE;
+class AndroidFriendlyRandomIdGenerator extends IdGenerator {
+  public static final AndroidFriendlyRandomIdGenerator INSTANCE = new AndroidFriendlyRandomIdGenerator();
 
   private static final Random random = new Random();
 

@@ -15,7 +15,7 @@ import javax.annotation.concurrent.Immutable;
  * operations are no-op except context propagation.
  */
 @Immutable
-final class PropagatedSpan implements Span {
+final class PropagatedSpan extends Span {
 
   static final PropagatedSpan INVALID = new PropagatedSpan(SpanContext.getInvalid());
 

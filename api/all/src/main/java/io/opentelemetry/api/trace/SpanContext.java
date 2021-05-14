@@ -23,14 +23,14 @@ import javax.annotation.concurrent.Immutable;
  * String, TraceFlags, TraceState)}.
  */
 @Immutable
-public interface SpanContext {
+public abstract class SpanContext {
 
   /**
    * Returns the invalid {@code SpanContext} that can be used for no-op operations.
    *
    * @return the invalid {@code SpanContext}.
    */
-  static SpanContext getInvalid() {
+  public static SpanContext getInvalid() {
     return ImmutableSpanContext.INVALID;
   }
 
@@ -48,7 +48,7 @@ public interface SpanContext {
    * @param traceState the trace state for the {@code SpanContext}.
    * @return a new {@code SpanContext} with the given identifiers and options.
    */
-  static SpanContext create(
+  public static SpanContext create(
       String traceIdHex, String spanIdHex, TraceFlags traceFlags, TraceState traceState) {
     return ImmutableSpanContext.create(
         traceIdHex, spanIdHex, traceFlags, traceState, /* remote=*/ false);
@@ -69,7 +69,7 @@ public interface SpanContext {
    * @param traceState the trace state for the {@code SpanContext}.
    * @return a new {@code SpanContext} with the given identifiers and options.
    */
-  static SpanContext createFromRemoteParent(
+  public static SpanContext createFromRemoteParent(
       String traceIdHex, String spanIdHex, TraceFlags traceFlags, TraceState traceState) {
     return ImmutableSpanContext.create(
         traceIdHex, spanIdHex, traceFlags, traceState, /* remote=*/ true);
@@ -81,14 +81,14 @@ public interface SpanContext {
    *
    * @return the trace identifier associated with this {@link SpanContext} as lowercase hex.
    */
-  String getTraceId();
+  public abstract String getTraceId();
 
   /**
    * Returns the trace identifier associated with this {@link SpanContext} as 16-byte array.
    *
    * @return the trace identifier associated with this {@link SpanContext} as 16-byte array.
    */
-  default byte[] getTraceIdBytes() {
+  public byte[] getTraceIdBytes() {
     return OtelEncodingUtils.bytesFromBase16(getTraceId(), TraceId.getLength());
   }
 
@@ -99,19 +99,19 @@ public interface SpanContext {
    * @return the span identifier associated with this {@link SpanContext} as 16 character lowercase
    *     hex (base16) String.
    */
-  String getSpanId();
+  public abstract String getSpanId();
 
   /**
    * Returns the span identifier associated with this {@link SpanContext} as 8-byte array.
    *
    * @return the span identifier associated with this {@link SpanContext} as 8-byte array.
    */
-  default byte[] getSpanIdBytes() {
+  public byte[] getSpanIdBytes() {
     return OtelEncodingUtils.bytesFromBase16(getSpanId(), SpanId.getLength());
   }
 
   /** Whether the span in this context is sampled. */
-  default boolean isSampled() {
+  public boolean isSampled() {
     return getTraceFlags().isSampled();
   }
 
@@ -120,21 +120,21 @@ public interface SpanContext {
    *
    * @return the trace flags associated with this {@link SpanContext}.
    */
-  TraceFlags getTraceFlags();
+  public abstract TraceFlags getTraceFlags();
 
   /**
    * Returns the {@code TraceState} associated with this {@code SpanContext}.
    *
    * @return the {@code TraceState} associated with this {@code SpanContext}.
    */
-  TraceState getTraceState();
+  public abstract TraceState getTraceState();
 
   /**
    * Returns {@code true} if this {@code SpanContext} is valid.
    *
    * @return {@code true} if this {@code SpanContext} is valid.
    */
-  default boolean isValid() {
+  public boolean isValid() {
     return TraceId.isValid(getTraceId()) && SpanId.isValid(getSpanId());
   }
 
@@ -143,5 +143,5 @@ public interface SpanContext {
    *
    * @return {@code true} if the {@code SpanContext} was propagated from a remote parent.
    */
-  boolean isRemote();
+  public abstract boolean isRemote();
 }

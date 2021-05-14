@@ -7,6 +7,7 @@ package io.opentelemetry.sdk.metrics;
 
 import io.opentelemetry.api.metrics.DoubleValueObserver;
 import io.opentelemetry.api.metrics.DoubleValueObserverBuilder;
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -42,7 +43,14 @@ final class DoubleValueObserverSdk extends AbstractAsynchronousInstrument
 
     @Override
     public DoubleValueObserverSdk build() {
-      return buildInstrument(DoubleValueObserverSdk::new);
+      return buildInstrument(
+          new BiFunction<InstrumentDescriptor, AsynchronousInstrumentAccumulator, DoubleValueObserverSdk>() {
+            @Override
+            public DoubleValueObserverSdk apply(InstrumentDescriptor instrumentDescriptor,
+                AsynchronousInstrumentAccumulator asynchronousInstrumentAccumulator) {
+              return new DoubleValueObserverSdk(instrumentDescriptor, asynchronousInstrumentAccumulator);
+            }
+          });
     }
   }
 }

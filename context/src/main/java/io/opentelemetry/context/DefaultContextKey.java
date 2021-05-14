@@ -5,7 +5,7 @@
 
 package io.opentelemetry.context;
 
-final class DefaultContextKey<T> implements ContextKey<T> {
+final class DefaultContextKey<T> extends ContextKey<T> {
 
   private final String name;
 

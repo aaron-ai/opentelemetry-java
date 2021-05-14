@@ -5,8 +5,6 @@
 
 package io.opentelemetry.context.propagation;
 
-import static java.util.Objects.requireNonNull;
-
 import javax.annotation.concurrent.ThreadSafe;
 
 /**
@@ -70,7 +68,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * }</pre>
  */
 @ThreadSafe
-public interface ContextPropagators {
+public abstract class ContextPropagators {
 
   /**
    * Returns a {@link ContextPropagators} which can be used to extract and inject context in text
@@ -86,13 +84,15 @@ public interface ContextPropagators {
    *     new MyCustomContextPropagator()));
    * }</pre>
    */
-  static ContextPropagators create(TextMapPropagator textPropagator) {
-    requireNonNull(textPropagator, "textPropagator");
+  public static ContextPropagators create(TextMapPropagator textPropagator) {
+    if (textPropagator == null) {
+      throw new NullPointerException("textPropagator");
+    }
     return new DefaultContextPropagators(textPropagator);
   }
 
   /** Returns a {@link ContextPropagators} which performs no injection or extraction. */
-  static ContextPropagators noop() {
+  public static ContextPropagators noop() {
     return DefaultContextPropagators.noop();
   }
 
@@ -105,5 +105,5 @@ public interface ContextPropagators {
    *
    * @return the {@link TextMapPropagator} propagator to inject and extract data.
    */
-  TextMapPropagator getTextMapPropagator();
+  public abstract TextMapPropagator getTextMapPropagator();
 }

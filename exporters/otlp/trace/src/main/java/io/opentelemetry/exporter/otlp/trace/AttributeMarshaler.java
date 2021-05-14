@@ -14,7 +14,6 @@ import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import java.io.IOException;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 abstract class AttributeMarshaler extends MarshalerWithSize {
   private static final AttributeMarshaler[] EMPTY_REPEATED = new AttributeMarshaler[0];
@@ -26,17 +25,15 @@ abstract class AttributeMarshaler extends MarshalerWithSize {
       return EMPTY_REPEATED;
     }
 
-    AttributeMarshaler[] attributeMarshalers = new AttributeMarshaler[attributes.size()];
+    final AttributeMarshaler[] attributeMarshalers = new AttributeMarshaler[attributes.size()];
     // TODO: Revisit how to avoid the atomic integer creation.
-    attributes.forEach(
-        new BiConsumer<AttributeKey<?>, Object>() {
-          int index = 0;
-
-          @Override
-          public void accept(AttributeKey<?> attributeKey, Object o) {
-            attributeMarshalers[index++] = AttributeMarshaler.create(attributeKey, o);
-          }
-        });
+    attributes.forEach(new io.opentelemetry.api.internal.BiConsumer<AttributeKey<?>, Object>() {
+      int index = 0;
+      @Override
+      public void accept(AttributeKey<?> attributeKey, Object o) {
+        attributeMarshalers[index++] = AttributeMarshaler.create(attributeKey, o);
+      }
+    });
     return attributeMarshalers;
   }
 

@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,7 +75,7 @@ final class LazyStorage {
   private static final ContextStorage storage;
 
   static {
-    AtomicReference<Throwable> deferredStorageFailure = new AtomicReference<>();
+    AtomicReference<Throwable> deferredStorageFailure = new AtomicReference<Throwable>();
     ContextStorage created = createStorage(deferredStorageFailure);
     if (Boolean.getBoolean(ENABLE_STRICT_CONTEXT_PROVIDER_PROPERTY)) {
       created = StrictContextStorage.create(created);
@@ -103,7 +102,7 @@ final class LazyStorage {
       return ContextStorage.defaultStorage();
     }
 
-    List<ContextStorageProvider> providers = new ArrayList<>();
+    List<ContextStorageProvider> providers = new ArrayList<ContextStorageProvider>();
     for (ContextStorageProvider provider : ServiceLoader.load(ContextStorageProvider.class)) {
       if (provider
           .getClass()

@@ -12,7 +12,7 @@ import javax.annotation.concurrent.Immutable;
 /** An immutable implementation of the {@link EventData}. */
 @AutoValue
 @Immutable
-abstract class ImmutableEventData implements EventData {
+abstract class ImmutableEventData extends EventData {
 
   /**
    * Returns a new immutable {@code Event}.
@@ -22,7 +22,7 @@ abstract class ImmutableEventData implements EventData {
    * @param attributes the attributes of the {@code Event}.
    * @return a new immutable {@code Event<T>}
    */
-  static EventData create(long epochNanos, String name, Attributes attributes) {
+  public static EventData create(long epochNanos, String name, Attributes attributes) {
     return create(epochNanos, name, attributes, attributes.size());
   }
 
@@ -35,7 +35,7 @@ abstract class ImmutableEventData implements EventData {
    * @param totalAttributeCount the total number of attributes recorded for the {@code Event}.
    * @return a new immutable {@code Event<T>}
    */
-  static EventData create(
+  public static EventData create(
       long epochNanos, String name, Attributes attributes, int totalAttributeCount) {
     return new AutoValue_ImmutableEventData(name, attributes, epochNanos, totalAttributeCount);
   }

@@ -14,7 +14,7 @@ import javax.annotation.concurrent.Immutable;
 
 /** Factory class for {@link Aggregator}. */
 @Immutable
-public interface AggregatorFactory {
+public abstract class AggregatorFactory {
   /**
    * Returns an {@code AggregationFactory} that calculates sum of recorded measurements.
    *
@@ -29,7 +29,7 @@ public interface AggregatorFactory {
    * @deprecated Use {@link AggregatorFactory#sum(AggregationTemporality)}
    */
   @Deprecated
-  static AggregatorFactory sum(boolean alwaysCumulative) {
+  public static AggregatorFactory sum(boolean alwaysCumulative) {
     return new SumAggregatorFactory(
         alwaysCumulative ? AggregationTemporality.CUMULATIVE : AggregationTemporality.DELTA);
   }
@@ -45,7 +45,7 @@ public interface AggregatorFactory {
    * @return an {@code AggregationFactory} that calculates sum of recorded measurements.
    * @since 1.2.0
    */
-  static AggregatorFactory sum(AggregationTemporality temporality) {
+  public static AggregatorFactory sum(AggregationTemporality temporality) {
     return new SumAggregatorFactory(temporality);
   }
 
@@ -60,7 +60,7 @@ public interface AggregatorFactory {
    * @return an {@code AggregationFactory} that calculates count of recorded measurements (the
    *     number of recorded * measurements).
    */
-  static AggregatorFactory count(AggregationTemporality temporality) {
+  public static AggregatorFactory count(AggregationTemporality temporality) {
     return new CountAggregatorFactory(temporality);
   }
 
@@ -77,7 +77,7 @@ public interface AggregatorFactory {
    * @return an {@code AggregationFactory} that calculates the last value of all recorded
    *     measurements.
    */
-  static AggregatorFactory lastValue() {
+  public static AggregatorFactory lastValue() {
     return LastValueAggregatorFactory.INSTANCE;
   }
 
@@ -92,7 +92,7 @@ public interface AggregatorFactory {
    * @return an {@code AggregationFactory} that calculates a simple summary of all recorded
    *     measurements.
    */
-  static AggregatorFactory minMaxSumCount() {
+  public static AggregatorFactory minMaxSumCount() {
     return MinMaxSumCountAggregatorFactory.INSTANCE;
   }
 
@@ -105,7 +105,7 @@ public interface AggregatorFactory {
    * @return an {@code AggregationFactory} that calculates histogram of recorded measurements.
    * @since 1.1.0
    */
-  static AggregatorFactory histogram(List<Double> boundaries, AggregationTemporality temporality) {
+  public static AggregatorFactory histogram(List<Double> boundaries, AggregationTemporality temporality) {
     return new HistogramAggregatorFactory(boundaries, temporality);
   }
 
@@ -119,7 +119,7 @@ public interface AggregatorFactory {
    * @param descriptor the descriptor of the {@code Instrument} that will record measurements.
    * @return a new {@link Aggregator}.
    */
-  <T> Aggregator<T> create(
+  public abstract <T> Aggregator<T> create(
       Resource resource,
       InstrumentationLibraryInfo instrumentationLibraryInfo,
       InstrumentDescriptor descriptor);

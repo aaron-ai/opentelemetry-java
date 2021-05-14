@@ -33,7 +33,7 @@ dependencies {
 tasks {
     withType(KotlinCompile::class) {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "1.6"
         }
     }
 

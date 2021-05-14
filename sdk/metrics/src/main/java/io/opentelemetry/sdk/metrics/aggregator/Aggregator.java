@@ -21,14 +21,14 @@ import javax.annotation.concurrent.Immutable;
  * #accumulateLong(long)} will be used when reading values from the instrument callbacks.
  */
 @Immutable
-public interface Aggregator<T> {
+public abstract class Aggregator<T> {
   /**
    * Returns a new {@link AggregatorHandle}. This MUST by used by the synchronous to aggregate
    * recorded measurements during the collection cycle.
    *
    * @return a new {@link AggregatorHandle}.
    */
-  AggregatorHandle<T> createHandle();
+  public abstract AggregatorHandle<T> createHandle();
 
   /**
    * Returns a new {@code Accumulation} for the given value. This MUST be used by the asynchronous
@@ -37,7 +37,7 @@ public interface Aggregator<T> {
    * @param value the given value to be used to create the {@code Accumulation}.
    * @return a new {@code Accumulation} for the given value.
    */
-  default T accumulateLong(long value) {
+   public T accumulateLong(long value) {
     throw new UnsupportedOperationException(
         "This aggregator does not support recording long values.");
   }
@@ -49,7 +49,7 @@ public interface Aggregator<T> {
    * @param value the given value to be used to create the {@code Accumulation}.
    * @return a new {@code Accumulation} for the given value.
    */
-  default T accumulateDouble(double value) {
+  public T accumulateDouble(double value) {
     throw new UnsupportedOperationException(
         "This aggregator does not support recording double values.");
   }
@@ -61,7 +61,7 @@ public interface Aggregator<T> {
    * @param accumulation the newly captured accumulation
    * @return the result of the merge of the given accumulations.
    */
-  T merge(T previousAccumulation, T accumulation);
+  public abstract T merge(T previousAccumulation, T accumulation);
 
   /**
    * Returns {@code true} if the processor needs to keep the previous collected state in order to
@@ -69,7 +69,7 @@ public interface Aggregator<T> {
    *
    * @return {@code true} if the processor needs to keep the previous collected state.
    */
-  boolean isStateful();
+  public abstract boolean isStateful();
 
   /**
    * Returns the {@link MetricData} that this {@code Aggregation} will produce.
@@ -80,7 +80,7 @@ public interface Aggregator<T> {
    * @return the {@link MetricDataType} that this {@code Aggregation} will produce.
    */
   @Nullable
-  MetricData toMetricData(
+  public abstract MetricData toMetricData(
       Map<Labels, T> accumulationByLabels,
       long startEpochNanos,
       long lastCollectionEpoch,

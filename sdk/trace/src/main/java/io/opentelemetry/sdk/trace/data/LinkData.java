@@ -17,7 +17,7 @@ import javax.annotation.concurrent.Immutable;
  * requests from different traces. Link can be also used to reference spans from the same trace.
  */
 @Immutable
-public interface LinkData {
+public abstract class LinkData {
 
   /**
    * Returns a new immutable {@link LinkData}.
@@ -25,7 +25,7 @@ public interface LinkData {
    * @param spanContext the {@link SpanContext} of this {@link LinkData}.
    * @return a new immutable {@link LinkData}
    */
-  static LinkData create(SpanContext spanContext) {
+  public static LinkData create(SpanContext spanContext) {
     return ImmutableLinkData.create(spanContext);
   }
 
@@ -36,7 +36,7 @@ public interface LinkData {
    * @param attributes the attributes of this {@link LinkData}.
    * @return a new immutable {@link LinkData}
    */
-  static LinkData create(SpanContext spanContext, Attributes attributes) {
+  public static LinkData create(SpanContext spanContext, Attributes attributes) {
     return ImmutableLinkData.create(spanContext, attributes);
   }
 
@@ -48,19 +48,19 @@ public interface LinkData {
    * @param totalAttributeCount the total number of attributed for this {@link LinkData}.
    * @return a new immutable {@link LinkData}
    */
-  static LinkData create(SpanContext spanContext, Attributes attributes, int totalAttributeCount) {
+  public static LinkData create(SpanContext spanContext, Attributes attributes, int totalAttributeCount) {
     return ImmutableLinkData.create(spanContext, attributes, totalAttributeCount);
   }
 
   /** Returns the {@link SpanContext} of the span this {@link LinkData} refers to. */
-  SpanContext getSpanContext();
+  public abstract SpanContext getSpanContext();
 
   /**
    * Returns the set of attributes.
    *
    * @return the set of attributes.
    */
-  Attributes getAttributes();
+  public abstract Attributes getAttributes();
 
   /**
    * The total number of attributes that were recorded on this Link. This number may be larger than
@@ -70,5 +70,5 @@ public interface LinkData {
    *
    * @return The number of attributes on this link.
    */
-  int getTotalAttributeCount();
+  public abstract int getTotalAttributeCount();
 }

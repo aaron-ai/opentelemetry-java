@@ -16,8 +16,8 @@ import io.opentelemetry.api.metrics.LongValueRecorder;
 import io.opentelemetry.api.metrics.common.Labels;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TransferQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Minimal implementation of the {@link BatchRecorder} that simply redirects the calls to the
@@ -25,10 +25,9 @@ import java.util.concurrent.TransferQueue;
  */
 final class BatchRecorderSdk implements BatchRecorder {
   private final Labels labelSet;
-
   // todo: this queue is unbounded; should we make it bounded and drop recordings after it gets
   // full?
-  private final TransferQueue<Recording> pendingRecordings = new LinkedTransferQueue<>();
+  private final BlockingQueue<Recording> pendingRecordings = new LinkedBlockingQueue<Recording>();
 
   BatchRecorderSdk(String... keyValuePairs) {
     this.labelSet = Labels.of(keyValuePairs);
@@ -72,26 +71,25 @@ final class BatchRecorderSdk implements BatchRecorder {
 
   @Override
   public void record() {
-    List<Recording> recordings = new ArrayList<>();
+    List<Recording> recordings = new ArrayList<Recording>();
     pendingRecordings.drainTo(recordings);
 
-    recordings.forEach(
-        (recording) -> {
-          Instrument instrument = recording.getInstrument();
-          if (instrument instanceof DoubleUpDownCounter) {
-            ((DoubleUpDownCounter) instrument).add(recording.getDoubleValue(), labelSet);
-          } else if (instrument instanceof DoubleCounter) {
-            ((DoubleCounter) instrument).add(recording.getDoubleValue(), labelSet);
-          } else if (instrument instanceof DoubleValueRecorder) {
-            ((DoubleValueRecorder) instrument).record(recording.getDoubleValue(), labelSet);
-          } else if (instrument instanceof LongUpDownCounter) {
-            ((LongUpDownCounter) instrument).add(recording.getLongValue(), labelSet);
-          } else if (instrument instanceof LongCounter) {
-            ((LongCounter) instrument).add(recording.getLongValue(), labelSet);
-          } else if (instrument instanceof LongValueRecorder) {
-            ((LongValueRecorder) instrument).record(recording.getLongValue(), labelSet);
-          }
-        });
+    for (Recording recording : recordings) {
+      Instrument instrument = recording.getInstrument();
+      if (instrument instanceof DoubleUpDownCounter) {
+        ((DoubleUpDownCounter) instrument).add(recording.getDoubleValue(), labelSet);
+      } else if (instrument instanceof DoubleCounter) {
+        ((DoubleCounter) instrument).add(recording.getDoubleValue(), labelSet);
+      } else if (instrument instanceof DoubleValueRecorder) {
+        ((DoubleValueRecorder) instrument).record(recording.getDoubleValue(), labelSet);
+      } else if (instrument instanceof LongUpDownCounter) {
+        ((LongUpDownCounter) instrument).add(recording.getLongValue(), labelSet);
+      } else if (instrument instanceof LongCounter) {
+        ((LongCounter) instrument).add(recording.getLongValue(), labelSet);
+      } else if (instrument instanceof LongValueRecorder) {
+        ((LongValueRecorder) instrument).record(recording.getLongValue(), labelSet);
+      }
+    }
   }
 
   private interface Recording {

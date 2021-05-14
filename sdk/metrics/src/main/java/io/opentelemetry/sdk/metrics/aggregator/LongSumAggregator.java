@@ -13,7 +13,7 @@ import io.opentelemetry.sdk.metrics.data.LongSumData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.AtomicLong;
 
 final class LongSumAggregator extends AbstractSumAggregator<Long> {
 
@@ -70,16 +70,18 @@ final class LongSumAggregator extends AbstractSumAggregator<Long> {
   }
 
   static final class Handle extends AggregatorHandle<Long> {
-    private final LongAdder current = new LongAdder();
+    private static final long DEFAULT_VALUE = 0L;
+
+    private final AtomicLong current = new AtomicLong(DEFAULT_VALUE);
 
     @Override
     protected Long doAccumulateThenReset() {
-      return this.current.sumThenReset();
+      return this.current.getAndSet(DEFAULT_VALUE);
     }
 
     @Override
     public void doRecordLong(long value) {
-      current.add(value);
+      current.getAndAdd(value);
     }
   }
 }

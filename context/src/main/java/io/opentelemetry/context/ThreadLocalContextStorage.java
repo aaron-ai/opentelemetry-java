@@ -9,34 +9,37 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
-enum ThreadLocalContextStorage implements ContextStorage {
-  INSTANCE;
+class ThreadLocalContextStorage extends ContextStorage {
+  public static final ThreadLocalContextStorage INSTANCE = new ThreadLocalContextStorage();
 
   private static final Logger logger = Logger.getLogger(ThreadLocalContextStorage.class.getName());
 
-  private static final ThreadLocal<Context> THREAD_LOCAL_STORAGE = new ThreadLocal<>();
+  private static final ThreadLocal<Context> THREAD_LOCAL_STORAGE = new ThreadLocal<Context>();
 
   @Override
-  public Scope attach(Context toAttach) {
+  public Scope attach(final Context toAttach) {
     if (toAttach == null) {
       // Null context not allowed so ignore it.
       return NoopScope.INSTANCE;
     }
 
-    Context beforeAttach = current();
+    final Context beforeAttach = current();
     if (toAttach == beforeAttach) {
       return NoopScope.INSTANCE;
     }
 
     THREAD_LOCAL_STORAGE.set(toAttach);
 
-    return () -> {
-      if (current() != toAttach) {
-        logger.log(
-            Level.FINE,
-            "Context in storage not the expected context, Scope.close was not called correctly");
+    return new Scope() {
+      @Override
+      public void close() {
+        if (current() != toAttach) {
+          logger.log(
+              Level.FINE,
+              "Context in storage not the expected context, Scope.close was not called correctly");
+        }
+        THREAD_LOCAL_STORAGE.set(beforeAttach);
       }
-      THREAD_LOCAL_STORAGE.set(beforeAttach);
     };
   }
 
@@ -46,8 +49,8 @@ enum ThreadLocalContextStorage implements ContextStorage {
     return THREAD_LOCAL_STORAGE.get();
   }
 
-  enum NoopScope implements Scope {
-    INSTANCE;
+  static class NoopScope extends Scope {
+    public static final NoopScope INSTANCE = new NoopScope();
 
     @Override
     public void close() {}

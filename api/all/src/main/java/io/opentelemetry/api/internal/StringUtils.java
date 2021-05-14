@@ -5,7 +5,6 @@
 
 package io.opentelemetry.api.internal;
 
-import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -65,7 +64,9 @@ public final class StringUtils {
    * @return the padded string
    */
   private static String padStart(String string, int minLength, char padChar) {
-    Objects.requireNonNull(string);
+    if (string == null) {
+      throw new NullPointerException();
+    }
     if (string.length() >= minLength) {
       return string;
     }

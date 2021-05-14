@@ -12,11 +12,11 @@ class ArrayBackedLabelsBuilder implements LabelsBuilder {
   private final List<Object> data;
 
   ArrayBackedLabelsBuilder() {
-    data = new ArrayList<>();
+    data = new ArrayList<Object>();
   }
 
   ArrayBackedLabelsBuilder(List<Object> data) {
-    this.data = new ArrayList<>(data);
+    this.data = new ArrayList<Object>(data);
   }
 
   @Override

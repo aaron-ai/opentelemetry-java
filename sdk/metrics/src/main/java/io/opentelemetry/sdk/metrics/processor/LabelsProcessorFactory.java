@@ -9,9 +9,15 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.resources.Resource;
 
-public interface LabelsProcessorFactory {
-  static LabelsProcessorFactory noop() {
-    return (resource, instrumentationLibraryInfo, descriptor) -> new NoopLabelsProcessor();
+public abstract class LabelsProcessorFactory {
+  public static LabelsProcessorFactory noop() {
+    return new LabelsProcessorFactory() {
+      @Override
+      public LabelsProcessor create(Resource resource,
+          InstrumentationLibraryInfo instrumentationLibraryInfo, InstrumentDescriptor descriptor) {
+        return new NoopLabelsProcessor();
+      }
+    };
   }
 
   /**
@@ -19,7 +25,7 @@ public interface LabelsProcessorFactory {
    *
    * @return new {@link LabelsProcessorFactory}
    */
-  LabelsProcessor create(
+  public abstract LabelsProcessor create(
       Resource resource,
       InstrumentationLibraryInfo instrumentationLibraryInfo,
       InstrumentDescriptor descriptor);

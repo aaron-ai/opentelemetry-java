@@ -67,7 +67,7 @@ final class DoubleLastValueAggregator extends AbstractAggregator<Double> {
 
   static final class Handle extends AggregatorHandle<Double> {
     @Nullable private static final Double DEFAULT_VALUE = null;
-    private final AtomicReference<Double> current = new AtomicReference<>(DEFAULT_VALUE);
+    private final AtomicReference<Double> current = new AtomicReference<Double>(DEFAULT_VALUE);
 
     private Handle() {}
 

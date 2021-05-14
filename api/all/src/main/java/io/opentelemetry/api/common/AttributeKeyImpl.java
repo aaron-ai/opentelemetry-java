@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @AutoValue
-abstract class AttributeKeyImpl<T> implements AttributeKey<T> {
+abstract class AttributeKeyImpl<T> extends AttributeKey<T> {
 
   // Used by auto-instrumentation agent. Check with auto-instrumentation before making changes to
   // this method.
@@ -25,7 +25,7 @@ abstract class AttributeKeyImpl<T> implements AttributeKey<T> {
   // Context, which would be the same class (interface) being instrumented at that time,
   // which would lead to the JVM throwing a LinkageError "attempted duplicate interface definition"
   static <T> AttributeKey<T> create(@Nullable String key, AttributeType type) {
-    return new AutoValue_AttributeKeyImpl<>(type, key != null ? key : "");
+    return new AutoValue_AttributeKeyImpl<T>(type, key != null ? key : "");
   }
 
   @Override

@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
 
 class ViewRegistryBuilder {
   private final EnumMap<InstrumentType, LinkedHashMap<Pattern, View>> configuration =
-      new EnumMap<>(InstrumentType.class);
-  private static final LinkedHashMap<Pattern, View> EMPTY_CONFIG = new LinkedHashMap<>();
+      new EnumMap<InstrumentType, LinkedHashMap<Pattern, View>>(InstrumentType.class);
+  private static final LinkedHashMap<Pattern, View> EMPTY_CONFIG = new LinkedHashMap<Pattern, View>();
 
   ViewRegistryBuilder() {
     for (InstrumentType type : InstrumentType.values()) {
@@ -38,7 +38,7 @@ class ViewRegistryBuilder {
 
   private static LinkedHashMap<Pattern, View> newLinkedHashMap(
       Pattern pattern, View view, LinkedHashMap<Pattern, View> parentConfiguration) {
-    LinkedHashMap<Pattern, View> result = new LinkedHashMap<>();
+    LinkedHashMap<Pattern, View> result = new LinkedHashMap<Pattern, View>();
     result.put(pattern, view);
     result.putAll(parentConfiguration);
     return result;

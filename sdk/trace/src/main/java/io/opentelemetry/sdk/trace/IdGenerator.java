@@ -11,7 +11,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 /** Interface used by the {@link SdkTracer} to generate new {@link SpanId}s and {@link TraceId}s. */
 @ThreadSafe
-public interface IdGenerator {
+public abstract class IdGenerator {
 
   /**
    * Returns a {@link IdGenerator} that generates purely random IDs, which is the default for
@@ -20,7 +20,7 @@ public interface IdGenerator {
    * <p>The underlying implementation uses {@link java.util.concurrent.ThreadLocalRandom} for
    * randomness but may change in the future.
    */
-  static IdGenerator random() {
+  public static IdGenerator random() {
     // note: check borrowed from OkHttp's check for Android.
     if ("Dalvik".equals(System.getProperty("java.vm.name"))) {
       return AndroidFriendlyRandomIdGenerator.INSTANCE;
@@ -33,12 +33,12 @@ public interface IdGenerator {
    *
    * @return a new valid {@code SpanId}.
    */
-  String generateSpanId();
+  public abstract String generateSpanId();
 
   /**
    * Generates a new valid {@code TraceId}.
    *
    * @return a new valid {@code TraceId}.
    */
-  String generateTraceId();
+  public abstract String generateTraceId();
 }

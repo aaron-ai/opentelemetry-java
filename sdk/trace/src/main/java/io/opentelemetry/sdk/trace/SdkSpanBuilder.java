@@ -12,6 +12,7 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.api.internal.Utils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -29,12 +30,11 @@ import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 /** {@link SdkSpanBuilder} is SDK implementation of {@link SpanBuilder}. */
-final class SdkSpanBuilder implements SpanBuilder {
+final class SdkSpanBuilder extends SpanBuilder {
 
   private final String spanName;
   private final InstrumentationLibraryInfo instrumentationLibraryInfo;
@@ -42,7 +42,7 @@ final class SdkSpanBuilder implements SpanBuilder {
   private final SpanLimits spanLimits;
 
   @Nullable private Context parent;
-  private SpanKind spanKind = SpanKind.INTERNAL;
+  private static final SpanKind spanKind = SpanKind.INTERNAL;
   @Nullable private AttributesMap attributes;
   @Nullable private List<LinkData> links;
   private int totalNumberOfLinksAdded = 0;
@@ -62,7 +62,9 @@ final class SdkSpanBuilder implements SpanBuilder {
 
   @Override
   public SpanBuilder setParent(Context context) {
-    Objects.requireNonNull(context, "context");
+    if (context == null) {
+      throw new NullPointerException("context");
+    }
     this.isRootSpan = false;
     this.parent = context;
     return this;
@@ -77,7 +79,9 @@ final class SdkSpanBuilder implements SpanBuilder {
 
   @Override
   public SpanBuilder setSpanKind(SpanKind spanKind) {
-    this.spanKind = Objects.requireNonNull(spanKind, "spanKind");
+    if (spanKind == null) {
+      throw new NullPointerException("spanKind");
+    }
     return this;
   }
 
@@ -109,10 +113,12 @@ final class SdkSpanBuilder implements SpanBuilder {
   }
 
   private void addLink(LinkData link) {
-    Objects.requireNonNull(link, "link");
+    if (link == null) {
+      throw new NullPointerException("link");
+    }
     totalNumberOfLinksAdded++;
     if (links == null) {
-      links = new ArrayList<>(spanLimits.getMaxNumberOfLinks());
+      links = new ArrayList<LinkData>(spanLimits.getMaxNumberOfLinks());
     }
 
     // don't bother doing anything with any links beyond the max.
@@ -145,7 +151,9 @@ final class SdkSpanBuilder implements SpanBuilder {
 
   @Override
   public <T> SpanBuilder setAttribute(AttributeKey<T> key, T value) {
-    Objects.requireNonNull(key, "key");
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
     if (value == null) {
       return this;
     }
@@ -182,7 +190,7 @@ final class SdkSpanBuilder implements SpanBuilder {
       traceId = parentSpanContext.getTraceId();
     }
     List<LinkData> immutableLinks =
-        links == null ? Collections.emptyList() : Collections.unmodifiableList(links);
+        links == null ? new ArrayList<LinkData>() : Collections.unmodifiableList(links);
     // Avoid any possibility to modify the links list by adding links to the Builder after the
     // startSpan is called. If that happens all the links will be added in a new list.
     links = null;
@@ -211,7 +219,12 @@ final class SdkSpanBuilder implements SpanBuilder {
       if (attributes == null) {
         attributes = new AttributesMap(spanLimits.getMaxNumberOfAttributes());
       }
-      samplingAttributes.forEach((key, value) -> attributes.put((AttributeKey) key, value));
+      samplingAttributes.forEach(new BiConsumer<AttributeKey<?>, Object>() {
+        @Override
+        public void accept(AttributeKey<?> key, Object value) {
+          attributes.put((AttributeKey) key, value);
+        }
+      });
     }
 
     // Avoid any possibility to modify the attributes by adding attributes to the Builder after the

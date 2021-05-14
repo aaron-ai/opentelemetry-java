@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import javax.annotation.Nullable;
 
-final class NoopTextMapPropagator implements TextMapPropagator {
+final class NoopTextMapPropagator extends TextMapPropagator {
   private static final NoopTextMapPropagator INSTANCE = new NoopTextMapPropagator();
 
   static TextMapPropagator getInstance() {

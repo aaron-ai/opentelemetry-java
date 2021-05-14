@@ -5,8 +5,8 @@
 
 package io.opentelemetry.api.trace;
 
+import io.opentelemetry.api.internal.BiConsumer;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -34,7 +34,7 @@ import javax.annotation.concurrent.Immutable;
  * here via the {@link TraceState#builder}.
  */
 @Immutable
-public interface TraceState {
+public abstract class TraceState {
 
   /**
    * Returns the default {@code TraceState} with no entries.
@@ -43,12 +43,12 @@ public interface TraceState {
    *
    * @return the default {@code TraceState} with no entries.
    */
-  static TraceState getDefault() {
+  public static TraceState getDefault() {
     return ArrayBasedTraceStateBuilder.empty();
   }
 
   /** Returns an empty {@code TraceStateBuilder}. */
-  static TraceStateBuilder builder() {
+  public static TraceStateBuilder builder() {
     return new ArrayBasedTraceStateBuilder();
   }
 
@@ -61,24 +61,24 @@ public interface TraceState {
    *     for the key.
    */
   @Nullable
-  String get(String key);
+  public abstract String get(String key);
 
   /** Returns the number of entries in this {@link TraceState}. */
-  int size();
+  public abstract int size();
 
   /** Returns whether this {@link TraceState} is empty, containing no entries. */
-  boolean isEmpty();
+  public abstract boolean isEmpty();
 
   /** Iterates over all the key-value entries contained in this {@link TraceState}. */
-  void forEach(BiConsumer<String, String> consumer);
+  public abstract void forEach(BiConsumer<String, String> consumer);
 
   /** Returns a read-only view of this {@link TraceState} as a {@link Map}. */
-  Map<String, String> asMap();
+  public abstract Map<String, String> asMap();
 
   /**
    * Returns a {@code Builder} based on this {@code TraceState}.
    *
    * @return a {@code Builder} based on this {@code TraceState}.
    */
-  TraceStateBuilder toBuilder();
+  public abstract TraceStateBuilder toBuilder();
 }

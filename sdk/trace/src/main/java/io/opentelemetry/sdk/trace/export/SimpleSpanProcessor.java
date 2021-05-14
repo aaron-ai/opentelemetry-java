@@ -5,8 +5,6 @@
 
 package io.opentelemetry.sdk.trace.export;
 
-import static java.util.Objects.requireNonNull;
-
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
@@ -31,14 +29,14 @@ import java.util.logging.Logger;
  * BatchSpanProcessor} instead, including in special environments such as serverless runtimes.
  * {@link SimpleSpanProcessor} is generally meant to for logging or testing.
  */
-public final class SimpleSpanProcessor implements SpanProcessor {
+public final class SimpleSpanProcessor extends SpanProcessor {
 
   private static final Logger logger = Logger.getLogger(SimpleSpanProcessor.class.getName());
 
   private final SpanExporter spanExporter;
   private final boolean sampled;
   private final Set<CompletableResultCode> pendingExports =
-      Collections.newSetFromMap(new ConcurrentHashMap<>());
+      Collections.newSetFromMap(new ConcurrentHashMap<CompletableResultCode, Boolean>());
   private final AtomicBoolean isShutdown = new AtomicBoolean(false);
 
   /**
@@ -46,12 +44,17 @@ public final class SimpleSpanProcessor implements SpanProcessor {
    * synchronously.
    */
   public static SpanProcessor create(SpanExporter exporter) {
-    requireNonNull(exporter, "exporter");
+    if (exporter == null) {
+      throw new NullPointerException("exporter");
+    }
     return new SimpleSpanProcessor(exporter, /* sampled= */ true);
   }
 
   SimpleSpanProcessor(SpanExporter spanExporter, boolean sampled) {
-    this.spanExporter = requireNonNull(spanExporter, "spanExporter");
+    if (spanExporter == null) {
+      throw new NullPointerException("spanExporter");
+    }
+    this.spanExporter = spanExporter;
     this.sampled = sampled;
   }
 
@@ -74,13 +77,15 @@ public final class SimpleSpanProcessor implements SpanProcessor {
       List<SpanData> spans = Collections.singletonList(span.toSpanData());
       final CompletableResultCode result = spanExporter.export(spans);
       pendingExports.add(result);
-      result.whenComplete(
-          () -> {
-            pendingExports.remove(result);
-            if (!result.isSuccess()) {
-              logger.log(Level.FINE, "Exporter failed");
-            }
-          });
+      result.whenComplete(new Runnable() {
+        @Override
+        public void run() {
+          pendingExports.remove(result);
+          if (!result.isSuccess()) {
+            logger.log(Level.FINE, "Exporter failed");
+          }
+        }
+      });
     } catch (RuntimeException e) {
       logger.log(Level.WARNING, "Exporter threw an Exception", e);
     }
@@ -99,19 +104,22 @@ public final class SimpleSpanProcessor implements SpanProcessor {
     final CompletableResultCode result = new CompletableResultCode();
 
     final CompletableResultCode flushResult = forceFlush();
-    flushResult.whenComplete(
-        () -> {
-          final CompletableResultCode shutdownResult = spanExporter.shutdown();
-          shutdownResult.whenComplete(
-              () -> {
-                if (!flushResult.isSuccess() || !shutdownResult.isSuccess()) {
-                  result.fail();
-                } else {
-                  result.succeed();
-                }
-              });
+    flushResult.whenComplete(new Runnable() {
+      @Override
+      public void run() {
+        final CompletableResultCode shutdownResult = spanExporter.shutdown();
+        shutdownResult.whenComplete(new Runnable() {
+          @Override
+          public void run() {
+            if (!flushResult.isSuccess() || !shutdownResult.isSuccess()) {
+              result.fail();
+            } else {
+              result.succeed();
+            }
+          }
         });
-
+      }
+    });
     return result;
   }
 

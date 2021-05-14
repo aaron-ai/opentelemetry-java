@@ -5,16 +5,17 @@
 
 package io.opentelemetry.api.common;
 
+import io.opentelemetry.api.internal.BiConsumer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 
-class ArrayBackedAttributesBuilder implements AttributesBuilder {
+class ArrayBackedAttributesBuilder extends AttributesBuilder {
   private final List<Object> data;
 
   ArrayBackedAttributesBuilder() {
-    data = new ArrayList<>();
+    data = new ArrayList<Object>();
   }
 
   ArrayBackedAttributesBuilder(List<Object> data) {
@@ -49,7 +50,12 @@ class ArrayBackedAttributesBuilder implements AttributesBuilder {
     }
     // Attributes must iterate over their entries with matching types for key / value, so this
     // downcast to the raw type is safe.
-    attributes.forEach((key, value) -> put((AttributeKey) key, value));
+    attributes.forEach(new BiConsumer<AttributeKey<?>, Object>() {
+      @Override
+      public void accept(AttributeKey<?> key, Object value) {
+        put((AttributeKey) key, value);
+      }
+    });
     return this;
   }
 

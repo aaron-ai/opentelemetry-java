@@ -34,7 +34,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 /** Exports spans using OTLP via gRPC, using OpenTelemetry's protobuf model. */
 @ThreadSafe
-public final class OtlpGrpcSpanExporter implements SpanExporter {
+public final class OtlpGrpcSpanExporter extends SpanExporter {
 
   private static final String EXPORTER_NAME = OtlpGrpcSpanExporter.class.getSimpleName();
   private static final Labels EXPORTER_NAME_LABELS = Labels.of("exporter", EXPORTER_NAME);
@@ -81,7 +81,7 @@ public final class OtlpGrpcSpanExporter implements SpanExporter {
    * @return the result of the operation
    */
   @Override
-  public CompletableResultCode export(Collection<SpanData> spans) {
+  public CompletableResultCode export(final Collection<SpanData> spans) {
     spansSeen.add(spans.size());
     ExportTraceServiceRequest exportTraceServiceRequest =
         ExportTraceServiceRequest.newBuilder()
@@ -180,7 +180,12 @@ public final class OtlpGrpcSpanExporter implements SpanExporter {
   @Override
   public CompletableResultCode shutdown() {
     final CompletableResultCode result = new CompletableResultCode();
-    managedChannel.notifyWhenStateChanged(ConnectivityState.SHUTDOWN, result::succeed);
+    managedChannel.notifyWhenStateChanged(ConnectivityState.SHUTDOWN, new Runnable() {
+      @Override
+      public void run() {
+        result.succeed();
+      }
+    });
     managedChannel.shutdown();
     this.spansSeen.unbind();
     this.spansExportedSuccess.unbind();

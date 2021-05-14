@@ -14,7 +14,9 @@ import static io.opentelemetry.proto.trace.v1.Status.DeprecatedStatusCode.DEPREC
 import static io.opentelemetry.proto.trace.v1.Status.DeprecatedStatusCode.DEPRECATED_STATUS_CODE_UNKNOWN_ERROR;
 
 import com.google.protobuf.ByteString;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.proto.trace.v1.InstrumentationLibrarySpans;
@@ -40,11 +42,11 @@ public final class SpanAdapter {
   public static List<ResourceSpans> toProtoResourceSpans(Collection<SpanData> spanDataList) {
     Map<Resource, Map<InstrumentationLibraryInfo, List<Span>>> resourceAndLibraryMap =
         groupByResourceAndLibrary(spanDataList);
-    List<ResourceSpans> resourceSpans = new ArrayList<>(resourceAndLibraryMap.size());
+    List<ResourceSpans> resourceSpans = new ArrayList<ResourceSpans>(resourceAndLibraryMap.size());
     for (Map.Entry<Resource, Map<InstrumentationLibraryInfo, List<Span>>> entryResource :
         resourceAndLibraryMap.entrySet()) {
       List<InstrumentationLibrarySpans> instrumentationLibrarySpans =
-          new ArrayList<>(entryResource.getValue().size());
+          new ArrayList<InstrumentationLibrarySpans>(entryResource.getValue().size());
       for (Map.Entry<InstrumentationLibraryInfo, List<Span>> entryLibrary :
           entryResource.getValue().entrySet()) {
         instrumentationLibrarySpans.add(
@@ -65,18 +67,18 @@ public final class SpanAdapter {
 
   private static Map<Resource, Map<InstrumentationLibraryInfo, List<Span>>>
       groupByResourceAndLibrary(Collection<SpanData> spanDataList) {
-    Map<Resource, Map<InstrumentationLibraryInfo, List<Span>>> result = new HashMap<>();
+    Map<Resource, Map<InstrumentationLibraryInfo, List<Span>>> result = new HashMap<Resource, Map<InstrumentationLibraryInfo, List<Span>>>();
     for (SpanData spanData : spanDataList) {
       Resource resource = spanData.getResource();
       Map<InstrumentationLibraryInfo, List<Span>> libraryInfoListMap =
           result.get(spanData.getResource());
       if (libraryInfoListMap == null) {
-        libraryInfoListMap = new HashMap<>();
+        libraryInfoListMap = new HashMap<InstrumentationLibraryInfo, List<Span>>();
         result.put(resource, libraryInfoListMap);
       }
       List<Span> spanList = libraryInfoListMap.get(spanData.getInstrumentationLibraryInfo());
       if (spanList == null) {
-        spanList = new ArrayList<>();
+        spanList = new ArrayList<Span>();
         libraryInfoListMap.put(spanData.getInstrumentationLibraryInfo(), spanList);
       }
       spanList.add(toProtoSpan(spanData));
@@ -98,8 +100,12 @@ public final class SpanAdapter {
     builder.setStartTimeUnixNano(spanData.getStartEpochNanos());
     builder.setEndTimeUnixNano(spanData.getEndEpochNanos());
     spanData
-        .getAttributes()
-        .forEach((key, value) -> builder.addAttributes(CommonAdapter.toProtoAttribute(key, value)));
+        .getAttributes().forEach(new BiConsumer<AttributeKey<?>, Object>() {
+      @Override
+      public void accept(AttributeKey<?> key, Object value) {
+        builder.addAttributes(CommonAdapter.toProtoAttribute(key, value));
+      }
+    });
     builder.setDroppedAttributesCount(
         spanData.getTotalAttributeCount() - spanData.getAttributes().size());
     for (EventData event : spanData.getEvents()) {
@@ -135,8 +141,12 @@ public final class SpanAdapter {
     builder.setName(event.getName());
     builder.setTimeUnixNano(event.getEpochNanos());
     event
-        .getAttributes()
-        .forEach((key, value) -> builder.addAttributes(CommonAdapter.toProtoAttribute(key, value)));
+        .getAttributes().forEach(new BiConsumer<AttributeKey<?>, Object>() {
+      @Override
+      public void accept(AttributeKey<?> key, Object value) {
+        builder.addAttributes(CommonAdapter.toProtoAttribute(key, value));
+      }
+    });
     builder.setDroppedAttributesCount(
         event.getTotalAttributeCount() - event.getAttributes().size());
     return builder.build();
@@ -148,9 +158,12 @@ public final class SpanAdapter {
     builder.setSpanId(ByteString.copyFrom(link.getSpanContext().getSpanIdBytes()));
     // TODO: Set TraceState;
     Attributes attributes = link.getAttributes();
-    attributes.forEach(
-        (key, value) -> builder.addAttributes(CommonAdapter.toProtoAttribute(key, value)));
-
+    attributes.forEach(new BiConsumer<AttributeKey<?>, Object>() {
+      @Override
+      public void accept(AttributeKey<?> key, Object value) {
+        builder.addAttributes(CommonAdapter.toProtoAttribute(key, value));
+      }
+    });
     builder.setDroppedAttributesCount(link.getTotalAttributeCount() - attributes.size());
     return builder.build();
   }

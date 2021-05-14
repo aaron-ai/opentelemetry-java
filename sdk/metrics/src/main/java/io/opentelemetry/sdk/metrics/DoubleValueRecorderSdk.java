@@ -10,6 +10,7 @@ import io.opentelemetry.api.metrics.DoubleValueRecorder;
 import io.opentelemetry.api.metrics.DoubleValueRecorderBuilder;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.sdk.metrics.aggregator.AggregatorHandle;
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -83,7 +84,14 @@ final class DoubleValueRecorderSdk extends AbstractSynchronousInstrument
 
     @Override
     public DoubleValueRecorderSdk build() {
-      return buildInstrument(DoubleValueRecorderSdk::new);
+      return buildInstrument(
+          new BiFunction<InstrumentDescriptor, SynchronousInstrumentAccumulator<?>, DoubleValueRecorderSdk>() {
+            @Override
+            public DoubleValueRecorderSdk apply(InstrumentDescriptor instrumentDescriptor,
+                SynchronousInstrumentAccumulator<?> synchronousInstrumentAccumulator) {
+              return new DoubleValueRecorderSdk(instrumentDescriptor, synchronousInstrumentAccumulator);
+            }
+          });
     }
   }
 }

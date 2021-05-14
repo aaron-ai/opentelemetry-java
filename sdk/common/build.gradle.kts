@@ -9,7 +9,7 @@ plugins {
 description = "OpenTelemetry SDK Common"
 extra["moduleName"] = "io.opentelemetry.sdk.common"
 
-val mrJarVersions = listOf(9)
+val mrJarVersions = listOf(6)
 
 testSets {
     create("testResourceDisabledByProperty")

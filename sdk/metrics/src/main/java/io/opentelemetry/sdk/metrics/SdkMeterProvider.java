@@ -8,7 +8,9 @@ package io.opentelemetry.sdk.metrics;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.context.Function;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.internal.ComponentRegistry;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricProducer;
@@ -31,7 +33,7 @@ import javax.annotation.Nullable;
  * io.opentelemetry.sdk.metrics.export.MetricExporter} has a handle to this MetricProducer, the two
  * exporters will not receive copies of the same metric data to export.
  */
-public final class SdkMeterProvider implements MeterProvider, MetricProducer {
+public final class SdkMeterProvider extends MeterProvider implements MetricProducer {
 
   private static final Logger LOGGER = Logger.getLogger(SdkMeterProvider.class.getName());
   static final String DEFAULT_METER_NAME = "unknown";
@@ -40,9 +42,13 @@ public final class SdkMeterProvider implements MeterProvider, MetricProducer {
 
   SdkMeterProvider(Clock clock, Resource resource, ViewRegistry viewRegistry) {
     this.sharedState = MeterProviderSharedState.create(clock, resource, viewRegistry);
-    this.registry =
-        new ComponentRegistry<>(
-            instrumentationLibraryInfo -> new SdkMeter(sharedState, instrumentationLibraryInfo));
+    this.registry = new ComponentRegistry<SdkMeter>(
+        new Function<InstrumentationLibraryInfo, SdkMeter>() {
+          @Override
+          public SdkMeter apply(InstrumentationLibraryInfo instrumentationLibraryInfo) {
+            return new SdkMeter(sharedState, instrumentationLibraryInfo);
+          }
+        });
   }
 
   @Override
@@ -63,7 +69,7 @@ public final class SdkMeterProvider implements MeterProvider, MetricProducer {
   @Override
   public Collection<MetricData> collectAllMetrics() {
     Collection<SdkMeter> meters = registry.getComponents();
-    List<MetricData> result = new ArrayList<>(meters.size());
+    List<MetricData> result = new ArrayList<MetricData>(meters.size());
     for (SdkMeter meter : meters) {
       result.addAll(meter.collectAll(sharedState.getClock().now()));
     }

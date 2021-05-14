@@ -5,10 +5,12 @@
 
 package io.opentelemetry.sdk.trace.export;
 
+import io.opentelemetry.api.metrics.AsynchronousInstrument;
 import io.opentelemetry.api.metrics.BoundLongCounter;
 import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.common.Consumer;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -39,7 +41,7 @@ import java.util.logging.Logger;
  * when there are {@code maxExportBatchSize} pending spans or {@code scheduleDelayNanos} has passed
  * since the last export finished.
  */
-public final class BatchSpanProcessor implements SpanProcessor {
+public final class BatchSpanProcessor extends SpanProcessor {
 
   private static final String WORKER_THREAD_NAME =
       BatchSpanProcessor.class.getSimpleName() + "_WorkerThread";
@@ -72,7 +74,7 @@ public final class BatchSpanProcessor implements SpanProcessor {
             scheduleDelayNanos,
             maxExportBatchSize,
             exporterTimeoutNanos,
-            JcTools.newMpscArrayQueue(maxQueueSize));
+            JcTools.newMpscArrayQueue(maxQueueSize, new ArrayBlockingQueue<ReadableSpan>(8)));
     Thread workerThread = new DaemonThreadFactory(WORKER_THREAD_NAME).newThread(worker);
     workerThread.start();
   }
@@ -140,7 +142,7 @@ public final class BatchSpanProcessor implements SpanProcessor {
     // Integer.MAX_VALUE.
     private final AtomicInteger spansNeeded = new AtomicInteger(Integer.MAX_VALUE);
     private final BlockingQueue<Boolean> signal;
-    private final AtomicReference<CompletableResultCode> flushRequested = new AtomicReference<>();
+    private final AtomicReference<CompletableResultCode> flushRequested = new AtomicReference<CompletableResultCode>();
     private volatile boolean continueWork = true;
     private final ArrayList<SpanData> batch;
 
@@ -149,23 +151,26 @@ public final class BatchSpanProcessor implements SpanProcessor {
         long scheduleDelayNanos,
         int maxExportBatchSize,
         long exporterTimeoutNanos,
-        Queue<ReadableSpan> queue) {
+        final Queue<ReadableSpan> queue) {
       this.spanExporter = spanExporter;
       this.scheduleDelayNanos = scheduleDelayNanos;
       this.maxExportBatchSize = maxExportBatchSize;
       this.exporterTimeoutNanos = exporterTimeoutNanos;
       this.queue = queue;
-      this.signal = new ArrayBlockingQueue<>(1);
+      this.signal = new ArrayBlockingQueue<Boolean>(1);
       Meter meter = GlobalMeterProvider.getMeter("io.opentelemetry.sdk.trace");
       meter
           .longValueObserverBuilder("queueSize")
           .setDescription("The number of spans queued")
           .setUnit("1")
-          .setUpdater(
-              result ->
-                  result.observe(
-                      queue.size(),
-                      Labels.of(SPAN_PROCESSOR_TYPE_LABEL, SPAN_PROCESSOR_TYPE_VALUE)))
+          .setUpdater(new Consumer<AsynchronousInstrument.LongResult>() {
+                        @Override
+                        public void accept(AsynchronousInstrument.LongResult result) {
+                          result.observe(
+                              queue.size(),
+                              Labels.of(SPAN_PROCESSOR_TYPE_LABEL, SPAN_PROCESSOR_TYPE_VALUE));
+                        }
+                      })
           .build();
       LongCounter processedSpansCounter =
           meter
@@ -182,7 +187,7 @@ public final class BatchSpanProcessor implements SpanProcessor {
           processedSpansCounter.bind(
               Labels.of(SPAN_PROCESSOR_TYPE_LABEL, SPAN_PROCESSOR_TYPE_VALUE, "dropped", "false"));
 
-      this.batch = new ArrayList<>(this.maxExportBatchSize);
+      this.batch = new ArrayList<SpanData>(this.maxExportBatchSize);
     }
 
     private void addSpan(ReadableSpan span) {
@@ -250,20 +255,23 @@ public final class BatchSpanProcessor implements SpanProcessor {
       final CompletableResultCode result = new CompletableResultCode();
 
       final CompletableResultCode flushResult = forceFlush();
-      flushResult.whenComplete(
-          () -> {
-            continueWork = false;
-            final CompletableResultCode shutdownResult = spanExporter.shutdown();
-            shutdownResult.whenComplete(
-                () -> {
-                  if (!flushResult.isSuccess() || !shutdownResult.isSuccess()) {
-                    result.fail();
-                  } else {
-                    result.succeed();
-                  }
-                });
+      flushResult.whenComplete(new Runnable() {
+        @Override
+        public void run() {
+          continueWork = false;
+          final CompletableResultCode shutdownResult = spanExporter.shutdown();
+          shutdownResult.whenComplete(new Runnable() {
+            @Override
+            public void run() {
+              if (!flushResult.isSuccess() || !shutdownResult.isSuccess()) {
+                result.fail();
+              } else {
+                result.succeed();
+              }
+            }
           });
-
+        }
+      });
       return result;
     }
 

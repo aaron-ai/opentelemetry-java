@@ -20,7 +20,7 @@ import io.opentelemetry.context.propagation.ContextPropagators;
  * @see TracerProvider
  * @see ContextPropagators
  */
-public interface OpenTelemetry {
+public abstract class OpenTelemetry {
   /** Returns a completely no-op {@link OpenTelemetry}. */
   static OpenTelemetry noop() {
     return DefaultOpenTelemetry.getNoop();
@@ -36,7 +36,7 @@ public interface OpenTelemetry {
   }
 
   /** Returns the {@link TracerProvider} for this {@link OpenTelemetry}. */
-  TracerProvider getTracerProvider();
+  public abstract TracerProvider getTracerProvider();
 
   /**
    * Gets or creates a named tracer instance from the {@link TracerProvider} for this {@link
@@ -46,7 +46,7 @@ public interface OpenTelemetry {
    *     instrument*ed* library (e.g., "io.opentelemetry.contrib.mongodb"). Must not be null.
    * @return a tracer instance.
    */
-  default Tracer getTracer(String instrumentationName) {
+  public Tracer getTracer(String instrumentationName) {
     return getTracerProvider().get(instrumentationName);
   }
 
@@ -59,10 +59,10 @@ public interface OpenTelemetry {
    * @param instrumentationVersion The version of the instrumentation library (e.g., "1.0.0").
    * @return a tracer instance.
    */
-  default Tracer getTracer(String instrumentationName, String instrumentationVersion) {
+  public Tracer getTracer(String instrumentationName, String instrumentationVersion) {
     return getTracerProvider().get(instrumentationName, instrumentationVersion);
   }
 
   /** Returns the {@link ContextPropagators} for this {@link OpenTelemetry}. */
-  ContextPropagators getPropagators();
+  public abstract ContextPropagators getPropagators();
 }

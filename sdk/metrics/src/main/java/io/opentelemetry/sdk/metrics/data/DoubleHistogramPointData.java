@@ -58,8 +58,8 @@ public abstract class DoubleHistogramPointData implements PointData {
         labels,
         sum,
         totalCount,
-        Collections.unmodifiableList(new ArrayList<>(boundaries)),
-        Collections.unmodifiableList(new ArrayList<>(counts)));
+        Collections.unmodifiableList(new ArrayList<Double>(boundaries)),
+        Collections.unmodifiableList(new ArrayList<Long>(counts)));
   }
 
   DoubleHistogramPointData() {}

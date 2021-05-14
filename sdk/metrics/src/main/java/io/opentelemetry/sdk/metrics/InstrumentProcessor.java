@@ -8,6 +8,7 @@ package io.opentelemetry.sdk.metrics;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.sdk.metrics.aggregator.Aggregator;
 import io.opentelemetry.sdk.metrics.data.MetricData;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ final class InstrumentProcessor<T> {
     this.aggregator = aggregator;
     this.startEpochNanos = startEpochNanos;
     this.lastEpochNanos = startEpochNanos;
-    this.accumulationMap = new HashMap<>();
+    this.accumulationMap = new HashMap<Labels, T>();
   }
 
   /**
@@ -70,9 +71,9 @@ final class InstrumentProcessor<T> {
 
     lastEpochNanos = epochNanos;
     if (!aggregator.isStateful()) {
-      accumulationMap = new HashMap<>();
+      accumulationMap = new HashMap<Labels, T>();
     }
 
-    return metricData == null ? Collections.emptyList() : Collections.singletonList(metricData);
+    return metricData == null ? new ArrayList<MetricData>() : Collections.singletonList(metricData);
   }
 }

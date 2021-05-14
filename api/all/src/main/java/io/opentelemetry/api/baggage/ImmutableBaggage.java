@@ -5,41 +5,59 @@
 
 package io.opentelemetry.api.baggage;
 
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.api.internal.ImmutableKeyValuePairs;
 import io.opentelemetry.api.internal.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-final class ImmutableBaggage extends ImmutableKeyValuePairs<String, BaggageEntry>
-    implements Baggage {
+final class ImmutableBaggage extends Baggage {
 
   private static final Baggage EMPTY = new ImmutableBaggage.Builder().build();
 
+  private final ImmutableKeyValuePairs<String, BaggageEntry> immutableKeyValuePairs;
+
   private ImmutableBaggage(Object[] data) {
-    super(data);
+    immutableKeyValuePairs = new ImmutableKeyValuePairs<String, BaggageEntry>(data);
   }
 
-  static Baggage empty() {
+  public static Baggage empty() {
     return EMPTY;
   }
 
-  static BaggageBuilder builder() {
+  public static BaggageBuilder builder() {
     return new Builder();
+  }
+
+  @Override
+  public int size() {
+    return immutableKeyValuePairs.size();
+  }
+
+  @Override
+  public void forEach(BiConsumer<? super String, ? super BaggageEntry> consumer) {
+    immutableKeyValuePairs.forEach(consumer);
+  }
+
+  @Override
+  public Map<String, BaggageEntry> asMap() {
+    return immutableKeyValuePairs.asMap();
   }
 
   @Nullable
   @Override
   public String getEntryValue(String entryKey) {
-    BaggageEntry entry = get(entryKey);
+    BaggageEntry entry = immutableKeyValuePairs.get(entryKey);
     return entry != null ? entry.getValue() : null;
   }
 
   @Override
   public BaggageBuilder toBuilder() {
-    return new Builder(new ArrayList<>(data()));
+    return new Builder(new ArrayList<Object>(immutableKeyValuePairs.data()));
   }
 
   private static Baggage sortAndFilterToBaggage(Object[] data) {
@@ -48,12 +66,12 @@ final class ImmutableBaggage extends ImmutableKeyValuePairs<String, BaggageEntry
 
   // TODO: Migrate to AutoValue.Builder
   // @AutoValue.Builder
-  static class Builder implements BaggageBuilder {
+  static class Builder extends BaggageBuilder {
 
     private final List<Object> data;
 
     Builder() {
-      this.data = new ArrayList<>();
+      this.data = new ArrayList<Object>();
     }
 
     Builder(List<Object> data) {

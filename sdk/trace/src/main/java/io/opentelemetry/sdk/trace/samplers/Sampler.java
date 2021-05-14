@@ -17,7 +17,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 /** A Sampler is used to make decisions on {@link Span} sampling. */
 @ThreadSafe
-public interface Sampler {
+public abstract class Sampler {
 
   /**
    * Returns a {@link Sampler} that always makes a "yes" {@link SamplingResult} for {@link Span}
@@ -26,7 +26,7 @@ public interface Sampler {
    * @return a {@code Sampler} that always makes a "yes" {@link SamplingResult} for {@code Span}
    *     sampling.
    */
-  static Sampler alwaysOn() {
+  public static Sampler alwaysOn() {
     return AlwaysOnSampler.INSTANCE;
   }
 
@@ -37,7 +37,7 @@ public interface Sampler {
    * @return a {@code Sampler} that always makes a "no" {@link SamplingResult} for {@code Span}
    *     sampling.
    */
-  static Sampler alwaysOff() {
+  public static Sampler alwaysOff() {
     return AlwaysOffSampler.INSTANCE;
   }
 
@@ -53,7 +53,7 @@ public interface Sampler {
    * @return a {@code Sampler} that follows the parent's sampling decision if one exists, otherwise
    *     following the root sampler's decision.
    */
-  static Sampler parentBased(Sampler root) {
+  public static Sampler parentBased(Sampler root) {
     return parentBasedBuilder(root).build();
   }
 
@@ -67,7 +67,7 @@ public interface Sampler {
    *     parent does not exist.
    * @return a {@code ParentBasedSamplerBuilder}
    */
-  static ParentBasedSamplerBuilder parentBasedBuilder(Sampler root) {
+  public static ParentBasedSamplerBuilder parentBasedBuilder(Sampler root) {
     return new ParentBasedSamplerBuilder(root);
   }
 
@@ -85,7 +85,7 @@ public interface Sampler {
    * @return a new TraceIdRatioBased {@link Sampler}.
    * @throws IllegalArgumentException if {@code ratio} is out of range
    */
-  static Sampler traceIdRatioBased(double ratio) {
+  public static Sampler traceIdRatioBased(double ratio) {
     return TraceIdRatioBasedSampler.create(ratio);
   }
 
@@ -102,7 +102,7 @@ public interface Sampler {
    * @param parentLinks the parentLinks associated with the new {@code Span}.
    * @return sampling samplingResult whether span should be sampled or not.
    */
-  SamplingResult shouldSample(
+  public abstract SamplingResult shouldSample(
       Context parentContext,
       String traceId,
       String name,
@@ -118,5 +118,5 @@ public interface Sampler {
    *
    * @return the description of this {@code Sampler}.
    */
-  String getDescription();
+  public abstract String getDescription();
 }

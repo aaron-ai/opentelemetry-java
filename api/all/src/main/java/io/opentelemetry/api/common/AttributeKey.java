@@ -18,50 +18,50 @@ import javax.annotation.concurrent.Immutable;
  */
 @SuppressWarnings("rawtypes")
 @Immutable
-public interface AttributeKey<T> {
+public abstract class AttributeKey<T> {
   /** Returns the underlying String representation of the key. */
-  String getKey();
+  public abstract String getKey();
 
   /** Returns the type of attribute for this key. Useful for building switch statements. */
-  AttributeType getType();
+  public abstract AttributeType getType();
 
   /** Returns a new AttributeKey for String valued attributes. */
-  static AttributeKey<String> stringKey(String key) {
+  public static AttributeKey<String> stringKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.STRING);
   }
 
   /** Returns a new AttributeKey for Boolean valued attributes. */
-  static AttributeKey<Boolean> booleanKey(String key) {
+  public static AttributeKey<Boolean> booleanKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.BOOLEAN);
   }
 
   /** Returns a new AttributeKey for Long valued attributes. */
-  static AttributeKey<Long> longKey(String key) {
+  public static AttributeKey<Long> longKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.LONG);
   }
 
   /** Returns a new AttributeKey for Double valued attributes. */
-  static AttributeKey<Double> doubleKey(String key) {
+  public static AttributeKey<Double> doubleKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.DOUBLE);
   }
 
   /** Returns a new AttributeKey for List&lt;String&gt; valued attributes. */
-  static AttributeKey<List<String>> stringArrayKey(String key) {
+  public static AttributeKey<List<String>> stringArrayKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.STRING_ARRAY);
   }
 
   /** Returns a new AttributeKey for List&lt;Boolean&gt; valued attributes. */
-  static AttributeKey<List<Boolean>> booleanArrayKey(String key) {
+  public static AttributeKey<List<Boolean>> booleanArrayKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.BOOLEAN_ARRAY);
   }
 
   /** Returns a new AttributeKey for List&lt;Long&gt; valued attributes. */
-  static AttributeKey<List<Long>> longArrayKey(String key) {
+  public static AttributeKey<List<Long>> longArrayKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.LONG_ARRAY);
   }
 
   /** Returns a new AttributeKey for List&lt;Double&gt; valued attributes. */
-  static AttributeKey<List<Double>> doubleArrayKey(String key) {
+  public static AttributeKey<List<Double>> doubleArrayKey(String key) {
     return AttributeKeyImpl.create(key, AttributeType.DOUBLE_ARRAY);
   }
 }

@@ -14,13 +14,13 @@ import javax.annotation.concurrent.ThreadSafe;
  * @see io.opentelemetry.api.metrics.Meter
  */
 @ThreadSafe
-public interface MeterProvider {
+public abstract class MeterProvider {
 
   /**
    * Returns a {@link MeterProvider} that only creates no-op {@link Instrument}s that neither record
    * nor are emitted.
    */
-  static MeterProvider noop() {
+  public static MeterProvider noop() {
     return DefaultMeterProvider.getInstance();
   }
 
@@ -31,7 +31,7 @@ public interface MeterProvider {
    *     instrument*ed* library.
    * @return a tracer instance.
    */
-  Meter get(String instrumentationName);
+  public abstract Meter get(String instrumentationName);
 
   /**
    * Gets or creates a named and versioned meter instance.
@@ -41,5 +41,5 @@ public interface MeterProvider {
    * @param instrumentationVersion The version of the instrumentation library.
    * @return a tracer instance.
    */
-  Meter get(String instrumentationName, String instrumentationVersion);
+  public abstract Meter get(String instrumentationName, String instrumentationVersion);
 }

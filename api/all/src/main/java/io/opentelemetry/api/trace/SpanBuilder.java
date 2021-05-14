@@ -5,13 +5,11 @@
 
 package io.opentelemetry.api.trace;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.context.Context;
-import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -103,7 +101,7 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>see {@link SpanBuilder#startSpan} for usage examples.
  */
-public interface SpanBuilder {
+public abstract class SpanBuilder {
 
   /**
    * Sets the parent to use from the specified {@code Context}. If not set, the value of {@code
@@ -118,7 +116,7 @@ public interface SpanBuilder {
    * @param context the {@code Context}.
    * @return this.
    */
-  SpanBuilder setParent(Context context);
+  public abstract SpanBuilder setParent(Context context);
 
   /**
    * Sets the option to become a root {@code Span} for a new trace. If not set, the value of {@code
@@ -128,7 +126,7 @@ public interface SpanBuilder {
    *
    * @return this.
    */
-  SpanBuilder setNoParent();
+  public abstract SpanBuilder setNoParent();
 
   /**
    * Adds a link to the newly created {@code Span}.
@@ -143,7 +141,7 @@ public interface SpanBuilder {
    * @param spanContext the context of the linked {@code Span}.
    * @return this.
    */
-  SpanBuilder addLink(SpanContext spanContext);
+  public abstract SpanBuilder addLink(SpanContext spanContext);
 
   /**
    * Adds a link to the newly created {@code Span}.
@@ -159,7 +157,7 @@ public interface SpanBuilder {
    * @param attributes the attributes of the {@code Link}.
    * @return this.
    */
-  SpanBuilder addLink(SpanContext spanContext, Attributes attributes);
+  public abstract SpanBuilder addLink(SpanContext spanContext, Attributes attributes);
 
   /**
    * Sets an attribute to the newly created {@code Span}. If {@code SpanBuilder} previously
@@ -175,7 +173,7 @@ public interface SpanBuilder {
    * @param value the value for this attribute.
    * @return this.
    */
-  SpanBuilder setAttribute(String key, String value);
+  public abstract SpanBuilder setAttribute(String key, String value);
 
   /**
    * Sets an attribute to the newly created {@code Span}. If {@code SpanBuilder} previously
@@ -188,7 +186,7 @@ public interface SpanBuilder {
    * @param value the value for this attribute.
    * @return this.
    */
-  SpanBuilder setAttribute(String key, long value);
+  public abstract SpanBuilder setAttribute(String key, long value);
 
   /**
    * Sets an attribute to the newly created {@code Span}. If {@code SpanBuilder} previously
@@ -201,7 +199,7 @@ public interface SpanBuilder {
    * @param value the value for this attribute.
    * @return this.
    */
-  SpanBuilder setAttribute(String key, double value);
+  public abstract SpanBuilder setAttribute(String key, double value);
 
   /**
    * Sets an attribute to the newly created {@code Span}. If {@code SpanBuilder} previously
@@ -214,7 +212,7 @@ public interface SpanBuilder {
    * @param value the value for this attribute.
    * @return this.
    */
-  SpanBuilder setAttribute(String key, boolean value);
+  public abstract SpanBuilder setAttribute(String key, boolean value);
 
   /**
    * Sets an attribute to the newly created {@code Span}. If {@code SpanBuilder} previously
@@ -226,7 +224,7 @@ public interface SpanBuilder {
    * @param value the value for this attribute.
    * @return this.
    */
-  <T> SpanBuilder setAttribute(AttributeKey<T> key, T value);
+  public abstract <T> SpanBuilder setAttribute(AttributeKey<T> key, T value);
 
   /**
    * Sets attributes to the {@link SpanBuilder}. If the {@link SpanBuilder} previously contained a
@@ -237,12 +235,16 @@ public interface SpanBuilder {
    * @since 1.2.0
    */
   @SuppressWarnings("unchecked")
-  default SpanBuilder setAllAttributes(Attributes attributes) {
+  public SpanBuilder setAllAttributes(Attributes attributes) {
     if (attributes == null || attributes.isEmpty()) {
       return this;
     }
-    attributes.forEach(
-        (attributeKey, value) -> setAttribute((AttributeKey<Object>) attributeKey, value));
+    attributes.forEach(new BiConsumer<AttributeKey<?>, Object>() {
+      @Override
+      public void accept(AttributeKey<?> attributeKey, Object value) {
+        setAttribute((AttributeKey<Object>) attributeKey, value);
+      }
+    });
     return this;
   }
 
@@ -253,7 +255,7 @@ public interface SpanBuilder {
    * @param spanKind the kind of the newly created {@code Span}.
    * @return this.
    */
-  SpanBuilder setSpanKind(SpanKind spanKind);
+  public abstract SpanBuilder setSpanKind(SpanKind spanKind);
 
   /**
    * Sets an explicit start timestamp for the newly created {@code Span}.
@@ -269,7 +271,7 @@ public interface SpanBuilder {
    * @param unit the unit of the timestamp.
    * @return this.
    */
-  SpanBuilder setStartTimestamp(long startTimestamp, TimeUnit unit);
+  public abstract SpanBuilder setStartTimestamp(long startTimestamp, TimeUnit unit);
 
   /**
    * Sets an explicit start timestamp for the newly created {@code Span}.
@@ -283,13 +285,14 @@ public interface SpanBuilder {
    *     Span}.
    * @return this.
    */
-  default SpanBuilder setStartTimestamp(Instant startTimestamp) {
-    if (startTimestamp == null) {
-      return this;
-    }
-    return setStartTimestamp(
-        SECONDS.toNanos(startTimestamp.getEpochSecond()) + startTimestamp.getNano(), NANOSECONDS);
-  }
+  // Block for Java 6
+//  SpanBuilder setStartTimestamp(Instant startTimestamp) {
+//    if (startTimestamp == null) {
+//      return this;
+//    }
+//    return setStartTimestamp(
+//        SECONDS.toNanos(startTimestamp.getEpochSecond()) + startTimestamp.getNano(), NANOSECONDS);
+//  }
 
   /**
    * Starts a new {@link Span}.
@@ -324,5 +327,5 @@ public interface SpanBuilder {
    *
    * @return the newly created {@code Span}.
    */
-  Span startSpan();
+  public abstract Span startSpan();
 }

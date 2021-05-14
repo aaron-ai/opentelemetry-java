@@ -7,27 +7,15 @@ package io.opentelemetry.context;
 
 import io.opentelemetry.context.ThreadLocalContextStorage.NoopScope;
 
-/**
- * An {@link AutoCloseable} that represents a mounted context for a block of code. A failure to call
- * {@link Scope#close()} will generally break tracing or cause memory leaks. It is recommended that
- * you use this class with a {@code try-with-resources} block:
- *
- * <pre>{@code
- * try (Scope ignored = span.makeCurrent()) {
- *   ...
- * }
- * }</pre>
- */
-public interface Scope extends AutoCloseable {
+public abstract class Scope  {
 
   /**
    * Returns a {@link Scope} that does nothing. Represents attaching a {@link Context} when it is
    * already attached.
    */
-  static Scope noop() {
+  public static Scope noop() {
     return NoopScope.INSTANCE;
   }
 
-  @Override
-  void close();
+  public abstract void close();
 }

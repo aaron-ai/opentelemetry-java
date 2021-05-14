@@ -10,6 +10,7 @@ import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.LongUpDownCounterBuilder;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.sdk.metrics.aggregator.AggregatorHandle;
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -83,7 +84,14 @@ final class LongUpDownCounterSdk extends AbstractSynchronousInstrument
 
     @Override
     public LongUpDownCounterSdk build() {
-      return buildInstrument(LongUpDownCounterSdk::new);
+      return buildInstrument(
+          new BiFunction<InstrumentDescriptor, SynchronousInstrumentAccumulator<?>, LongUpDownCounterSdk>() {
+            @Override
+            public LongUpDownCounterSdk apply(InstrumentDescriptor instrumentDescriptor,
+                SynchronousInstrumentAccumulator<?> synchronousInstrumentAccumulator) {
+              return new LongUpDownCounterSdk(instrumentDescriptor, synchronousInstrumentAccumulator);
+            }
+          });
     }
   }
 }

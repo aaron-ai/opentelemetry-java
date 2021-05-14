@@ -8,7 +8,7 @@ package io.opentelemetry.api.metrics;
 import javax.annotation.concurrent.ThreadSafe;
 
 @ThreadSafe
-final class DefaultMeterProvider implements MeterProvider {
+final class DefaultMeterProvider extends MeterProvider {
 
   private static final MeterProvider INSTANCE = new DefaultMeterProvider();
 

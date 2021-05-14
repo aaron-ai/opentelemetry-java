@@ -5,26 +5,28 @@
 
 package io.opentelemetry.sdk.trace;
 
-import static java.util.Objects.requireNonNull;
-
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.internal.SystemClock;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /** Builder of {@link SdkTracerProvider}. */
 public final class SdkTracerProviderBuilder {
   private static final Sampler DEFAULT_SAMPLER = Sampler.parentBased(Sampler.alwaysOn());
 
-  private final List<SpanProcessor> spanProcessors = new ArrayList<>();
+  private final List<SpanProcessor> spanProcessors = new ArrayList<SpanProcessor>();
 
   private Clock clock = SystemClock.getInstance();
   private IdGenerator idsGenerator = IdGenerator.random();
   private Resource resource = Resource.getDefault();
-  private Supplier<SpanLimits> spanLimitsSupplier = SpanLimits::getDefault;
+  private Supplier<SpanLimits> spanLimitsSupplier = new Supplier<SpanLimits>() {
+    @Override
+    public SpanLimits get() {
+      return SpanLimits.getDefault();
+    }
+  };
   private Sampler sampler = DEFAULT_SAMPLER;
 
   /**
@@ -38,7 +40,9 @@ public final class SdkTracerProviderBuilder {
    * @return this
    */
   public SdkTracerProviderBuilder setClock(Clock clock) {
-    requireNonNull(clock, "clock");
+    if (clock == null) {
+      throw new NullPointerException("clock");
+    }
     this.clock = clock;
     return this;
   }
@@ -54,7 +58,9 @@ public final class SdkTracerProviderBuilder {
    * @return this
    */
   public SdkTracerProviderBuilder setIdGenerator(IdGenerator idGenerator) {
-    requireNonNull(idGenerator, "idGenerator");
+    if (idGenerator == null) {
+      throw new NullPointerException("idGenerator");
+    }
     this.idsGenerator = idGenerator;
     return this;
   }
@@ -66,7 +72,9 @@ public final class SdkTracerProviderBuilder {
    * @return this
    */
   public SdkTracerProviderBuilder setResource(Resource resource) {
-    requireNonNull(resource, "resource");
+    if (resource == null) {
+      throw new NullPointerException("resource");
+    }
     this.resource = resource;
     return this;
   }
@@ -81,9 +89,16 @@ public final class SdkTracerProviderBuilder {
    *     io.opentelemetry.api.trace.Span}.
    * @return this
    */
-  public SdkTracerProviderBuilder setSpanLimits(SpanLimits spanLimits) {
-    requireNonNull(spanLimits, "spanLimits");
-    this.spanLimitsSupplier = () -> spanLimits;
+  public SdkTracerProviderBuilder setSpanLimits(final SpanLimits spanLimits) {
+    if (spanLimits == null) {
+      throw new NullPointerException("spanLimits");
+    }
+    this.spanLimitsSupplier = new Supplier<SpanLimits>() {
+      @Override
+      public SpanLimits get() {
+        return spanLimits;
+      }
+    };
     return this;
   }
 
@@ -99,7 +114,9 @@ public final class SdkTracerProviderBuilder {
    * @return this
    */
   public SdkTracerProviderBuilder setSpanLimits(Supplier<SpanLimits> spanLimitsSupplier) {
-    requireNonNull(spanLimitsSupplier, "spanLimitsSupplier");
+    if (spanLimitsSupplier == null) {
+      throw new NullPointerException("spanLimitsSupplier");
+    }
     this.spanLimitsSupplier = spanLimitsSupplier;
     return this;
   }
@@ -115,7 +132,9 @@ public final class SdkTracerProviderBuilder {
    * @return this
    */
   public SdkTracerProviderBuilder setSampler(Sampler sampler) {
-    requireNonNull(sampler, "sampler");
+    if (sampler == null) {
+      throw new NullPointerException("sampler");
+    }
     this.sampler = sampler;
     return this;
   }

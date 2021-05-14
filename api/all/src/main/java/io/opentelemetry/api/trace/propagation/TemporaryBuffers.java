@@ -14,7 +14,7 @@ package io.opentelemetry.api.trace.propagation;
  */
 final class TemporaryBuffers {
 
-  private static final ThreadLocal<char[]> CHAR_ARRAY = new ThreadLocal<>();
+  private static final ThreadLocal<char[]> CHAR_ARRAY = new ThreadLocal<char[]>();
 
   /**
    * A {@link ThreadLocal} {@code char[]} of size {@code len}. Take care when using a large value of

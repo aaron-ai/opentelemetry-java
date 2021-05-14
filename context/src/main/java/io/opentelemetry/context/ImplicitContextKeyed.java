@@ -5,13 +5,11 @@
 
 package io.opentelemetry.context;
 
-import com.google.errorprone.annotations.MustBeClosed;
-
 /**
  * A value that can be stored inside {@link Context}. Types will generally use this interface to
  * allow storing themselves in {@link Context} without exposing a {@link ContextKey}.
  */
-public interface ImplicitContextKeyed {
+public abstract class ImplicitContextKeyed {
 
   /**
    * Adds this {@link ImplicitContextKeyed} value to the {@link Context#current() current context}
@@ -28,8 +26,8 @@ public interface ImplicitContextKeyed {
    * use {@code withContext(value.asContextElement())} provided by the {@code
    * opentelemetry-extension-kotlin} library.
    */
-  @MustBeClosed
-  default Scope makeCurrent() {
+//  @MustBeClosed
+  public Scope makeCurrent() {
     return Context.current().with(this).makeCurrent();
   }
 
@@ -43,5 +41,5 @@ public interface ImplicitContextKeyed {
    *   <li>{@code myContextValue.storeInContext(context)}
    * </ul>
    */
-  Context storeInContext(Context context);
+  public abstract Context storeInContext(Context context);
 }

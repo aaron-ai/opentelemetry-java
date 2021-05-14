@@ -9,7 +9,7 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.resources.Resource;
 
-public abstract class AbstractAggregator<T> implements Aggregator<T> {
+public abstract class AbstractAggregator<T> extends Aggregator<T> {
   private final Resource resource;
   private final InstrumentationLibraryInfo instrumentationLibraryInfo;
   private final InstrumentDescriptor instrumentDescriptor;

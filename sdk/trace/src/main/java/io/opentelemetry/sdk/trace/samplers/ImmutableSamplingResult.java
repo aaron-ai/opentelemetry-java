@@ -11,7 +11,7 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable
 @AutoValue
-abstract class ImmutableSamplingResult implements SamplingResult {
+abstract class ImmutableSamplingResult extends SamplingResult {
 
   static final SamplingResult EMPTY_RECORDED_AND_SAMPLED_SAMPLING_RESULT =
       ImmutableSamplingResult.createWithoutAttributes(SamplingDecision.RECORD_AND_SAMPLE);

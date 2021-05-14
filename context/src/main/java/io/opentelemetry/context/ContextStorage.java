@@ -22,7 +22,6 @@
 
 package io.opentelemetry.context;
 
-import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /**
@@ -60,7 +59,7 @@ import javax.annotation.Nullable;
  * > }
  * }</pre>
  */
-public interface ContextStorage {
+public abstract class ContextStorage {
 
   /**
    * Returns the {@link ContextStorage} being used by this application. This is only for use when
@@ -68,14 +67,14 @@ public interface ContextStorage {
    * or detach a {@link Context} in an application, use {@link Context#makeCurrent()} and {@link
    * Scope#close()}.
    */
-  static ContextStorage get() {
+  public static ContextStorage get() {
     return LazyStorage.get();
   }
 
   /**
    * Returns the default {@link ContextStorage} which stores {@link Context} using a threadlocal.
    */
-  static ContextStorage defaultStorage() {
+  public static ContextStorage defaultStorage() {
     return ThreadLocalContextStorage.INSTANCE;
   }
 
@@ -85,7 +84,7 @@ public interface ContextStorage {
    * application as possible to have effect, often as part of a static initialization block in your
    * main class.
    */
-  static void addWrapper(Function<? super ContextStorage, ? extends ContextStorage> wrapper) {
+  public static void addWrapper(Function<? super ContextStorage, ? extends ContextStorage> wrapper) {
     ContextStorageWrappers.addWrapper(wrapper);
   }
 
@@ -94,12 +93,12 @@ public interface ContextStorage {
    * representing the scope of execution. {@link Scope#close()} must be called when the current
    * {@link Context} should be restored to what it was before attaching {@code toAttach}.
    */
-  Scope attach(Context toAttach);
+  public abstract Scope attach(Context toAttach);
 
   /**
    * Returns the current {@link Context}. If no {@link Context} has been attached yet, this will
    * return {@code null}.
    */
   @Nullable
-  Context current();
+  public abstract Context current();
 }

@@ -5,14 +5,11 @@
 
 package io.opentelemetry.api.trace;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ImplicitContextKeyed;
-import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -25,13 +22,13 @@ import javax.annotation.concurrent.ThreadSafe;
  * <p>{@code Span} <b>must</b> be ended by calling {@link #end()}.
  */
 @ThreadSafe
-public interface Span extends ImplicitContextKeyed {
+public abstract class Span extends ImplicitContextKeyed {
 
   /**
    * Returns the {@link Span} from the current {@link Context}, falling back to a default, no-op
    * {@link Span} if there is no span in the current context.
    */
-  static Span current() {
+  public static Span current() {
     Span span = Context.current().get(SpanContextKey.KEY);
     return span == null ? getInvalid() : span;
   }
@@ -40,7 +37,7 @@ public interface Span extends ImplicitContextKeyed {
    * Returns the {@link Span} from the specified {@link Context}, falling back to a default, no-op
    * {@link Span} if there is no span in the context.
    */
-  static Span fromContext(Context context) {
+  public static Span fromContext(Context context) {
     if (context == null) {
       return Span.getInvalid();
     }
@@ -53,7 +50,7 @@ public interface Span extends ImplicitContextKeyed {
    * span in the context.
    */
   @Nullable
-  static Span fromContextOrNull(Context context) {
+  public static Span fromContextOrNull(Context context) {
     if (context == null) {
       return null;
     }
@@ -64,7 +61,7 @@ public interface Span extends ImplicitContextKeyed {
    * Returns an invalid {@link Span}. An invalid {@link Span} is used when tracing is disabled,
    * usually because there is no OpenTelemetry SDK installed.
    */
-  static Span getInvalid() {
+  public static Span getInvalid() {
     return PropagatedSpan.INVALID;
   }
 
@@ -73,7 +70,7 @@ public interface Span extends ImplicitContextKeyed {
    * functionality. It will not be exported and all tracing operations are no-op, but it can be used
    * to propagate a valid {@link SpanContext} downstream.
    */
-  static Span wrap(SpanContext spanContext) {
+  public static Span wrap(SpanContext spanContext) {
     if (spanContext == null || !spanContext.isValid()) {
       return getInvalid();
     }
@@ -94,7 +91,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param value the value for this attribute.
    * @return this.
    */
-  default Span setAttribute(String key, String value) {
+  public Span setAttribute(String key, String value) {
     return setAttribute(AttributeKey.stringKey(key), value);
   }
 
@@ -109,7 +106,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param value the value for this attribute.
    * @return this.
    */
-  default Span setAttribute(String key, long value) {
+  public Span setAttribute(String key, long value) {
     return setAttribute(AttributeKey.longKey(key), value);
   }
 
@@ -124,7 +121,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param value the value for this attribute.
    * @return this.
    */
-  default Span setAttribute(String key, double value) {
+  public Span setAttribute(String key, double value) {
     return setAttribute(AttributeKey.doubleKey(key), value);
   }
 
@@ -139,7 +136,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param value the value for this attribute.
    * @return this.
    */
-  default Span setAttribute(String key, boolean value) {
+  public Span setAttribute(String key, boolean value) {
     return setAttribute(AttributeKey.booleanKey(key), value);
   }
 
@@ -153,7 +150,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param value the value for this attribute.
    * @return this.
    */
-  <T> Span setAttribute(AttributeKey<T> key, T value);
+  public abstract <T> Span setAttribute(AttributeKey<T> key, T value);
 
   /**
    * Sets an attribute to the {@code Span}. If the {@code Span} previously contained a mapping for
@@ -163,7 +160,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param value the value for this attribute.
    * @return this.
    */
-  default Span setAttribute(AttributeKey<Long> key, int value) {
+  public Span setAttribute(AttributeKey<Long> key, int value) {
     return setAttribute(key, (long) value);
   }
 
@@ -176,12 +173,16 @@ public interface Span extends ImplicitContextKeyed {
    * @since 1.2.0
    */
   @SuppressWarnings("unchecked")
-  default Span setAllAttributes(Attributes attributes) {
+  public Span setAllAttributes(final Attributes attributes) {
     if (attributes == null || attributes.isEmpty()) {
       return this;
     }
-    attributes.forEach(
-        (attributeKey, value) -> this.setAttribute((AttributeKey<Object>) attributeKey, value));
+    attributes.forEach(new BiConsumer<AttributeKey<?>, Object>() {
+      @Override
+      public void accept(AttributeKey<?> attributeKey, Object value) {
+        Span.this.setAttribute((AttributeKey<Object>) attributeKey, value);
+      }
+    });
     return this;
   }
 
@@ -191,7 +192,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param name the name of the event.
    * @return this.
    */
-  default Span addEvent(String name) {
+  public Span addEvent(String name) {
     return addEvent(name, Attributes.empty());
   }
 
@@ -209,7 +210,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param unit the unit of the timestamp
    * @return this.
    */
-  default Span addEvent(String name, long timestamp, TimeUnit unit) {
+  public Span addEvent(String name, long timestamp, TimeUnit unit) {
     return addEvent(name, Attributes.empty(), timestamp, unit);
   }
 
@@ -226,13 +227,14 @@ public interface Span extends ImplicitContextKeyed {
    * @param timestamp the explicit event timestamp since epoch.
    * @return this.
    */
-  default Span addEvent(String name, Instant timestamp) {
-    if (timestamp == null) {
-      return addEvent(name);
-    }
-    return addEvent(
-        name, SECONDS.toNanos(timestamp.getEpochSecond()) + timestamp.getNano(), NANOSECONDS);
-  }
+  // Block for Java 6
+//  Span addEvent(String name, Instant timestamp) {
+//    if (timestamp == null) {
+//      return addEvent(name);
+//    }
+//    return addEvent(
+//        name, SECONDS.toNanos(timestamp.getEpochSecond()) + timestamp.getNano(), NANOSECONDS);
+//  }
 
   /**
    * Adds an event to the {@link Span} with the given {@link Attributes}. The timestamp of the event
@@ -243,7 +245,7 @@ public interface Span extends ImplicitContextKeyed {
    *     the {@code Span} as for {@code setAttribute()}.
    * @return this.
    */
-  Span addEvent(String name, Attributes attributes);
+  public abstract Span addEvent(String name, Attributes attributes);
 
   /**
    * Adds an event to the {@link Span} with the given {@link Attributes} and {@code timestamp}.
@@ -261,7 +263,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param unit the unit of the timestamp
    * @return this.
    */
-  Span addEvent(String name, Attributes attributes, long timestamp, TimeUnit unit);
+  public abstract Span addEvent(String name, Attributes attributes, long timestamp, TimeUnit unit);
 
   /**
    * Adds an event to the {@link Span} with the given {@link Attributes} and {@code timestamp}.
@@ -278,21 +280,22 @@ public interface Span extends ImplicitContextKeyed {
    * @param timestamp the explicit event timestamp since epoch.
    * @return this.
    */
-  default Span addEvent(String name, Attributes attributes, Instant timestamp) {
-    if (timestamp == null) {
-      return addEvent(name, attributes);
-    }
-    return addEvent(
-        name,
-        attributes,
-        SECONDS.toNanos(timestamp.getEpochSecond()) + timestamp.getNano(),
-        NANOSECONDS);
-  }
+  // Block for Java 6
+//  Span addEvent(String name, Attributes attributes, Instant timestamp) {
+//    if (timestamp == null) {
+//      return addEvent(name, attributes);
+//    }
+//    return addEvent(
+//        name,
+//        attributes,
+//        SECONDS.toNanos(timestamp.getEpochSecond()) + timestamp.getNano(),
+//        NANOSECONDS);
+//  }
 
   /**
    * Sets the status to the {@code Span}.
    *
-   * <p>If used, this will override the default {@code Span} status. Default status code is {@link
+   * <p>If used, this will override the {@code Span} status. status code is {@link
    * StatusCode#UNSET}.
    *
    * <p>Only the value of the last call will be recorded, and implementations are free to ignore
@@ -301,14 +304,14 @@ public interface Span extends ImplicitContextKeyed {
    * @param statusCode the {@link StatusCode} to set.
    * @return this.
    */
-  default Span setStatus(StatusCode statusCode) {
+  public Span setStatus(StatusCode statusCode) {
     return setStatus(statusCode, "");
   }
 
   /**
    * Sets the status to the {@code Span}.
    *
-   * <p>If used, this will override the default {@code Span} status. Default status code is {@link
+   * <p>If used, this will override the {@code Span} status. status code is {@link
    * StatusCode#UNSET}.
    *
    * <p>Only the value of the last call will be recorded, and implementations are free to ignore
@@ -318,7 +321,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param description the description of the {@code Status}.
    * @return this.
    */
-  Span setStatus(StatusCode statusCode, String description);
+  public abstract Span setStatus(StatusCode statusCode, String description);
 
   /**
    * Records information about the {@link Throwable} to the {@link Span}.
@@ -330,7 +333,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param exception the {@link Throwable} to record.
    * @return this.
    */
-  default Span recordException(Throwable exception) {
+  public Span recordException(Throwable exception) {
     return recordException(exception, Attributes.empty());
   }
 
@@ -341,7 +344,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param additionalAttributes the additional {@link Attributes} to record.
    * @return this.
    */
-  Span recordException(Throwable exception, Attributes additionalAttributes);
+  public abstract Span recordException(Throwable exception, Attributes additionalAttributes);
 
   /**
    * Updates the {@code Span} name.
@@ -354,7 +357,7 @@ public interface Span extends ImplicitContextKeyed {
    * @param name the {@code Span} name.
    * @return this.
    */
-  Span updateName(String name);
+  public abstract Span updateName(String name);
 
   /**
    * Marks the end of {@code Span} execution.
@@ -362,7 +365,7 @@ public interface Span extends ImplicitContextKeyed {
    * <p>Only the timing of the first end call for a given {@code Span} will be recorded, and
    * implementations are free to ignore all further calls.
    */
-  void end();
+  public abstract void end();
 
   /**
    * Marks the end of {@code Span} execution with the specified timestamp.
@@ -377,7 +380,7 @@ public interface Span extends ImplicitContextKeyed {
    *     indicates current time should be used.
    * @param unit the unit of the timestamp
    */
-  void end(long timestamp, TimeUnit unit);
+  public abstract void end(long timestamp, TimeUnit unit);
 
   /**
    * Marks the end of {@code Span} execution with the specified timestamp.
@@ -391,20 +394,21 @@ public interface Span extends ImplicitContextKeyed {
    * @param timestamp the explicit timestamp from the epoch, for this {@code Span}. {@code 0}
    *     indicates current time should be used.
    */
-  default void end(Instant timestamp) {
-    if (timestamp == null) {
-      end();
-      return;
-    }
-    end(SECONDS.toNanos(timestamp.getEpochSecond()) + timestamp.getNano(), NANOSECONDS);
-  }
+  // Block for Java 6
+//  void end(Instant timestamp) {
+//    if (timestamp == null) {
+//      end();
+//      return;
+//    }
+//    end(SECONDS.toNanos(timestamp.getEpochSecond()) + timestamp.getNano(), NANOSECONDS);
+//  }
 
   /**
    * Returns the {@code SpanContext} associated with this {@code Span}.
    *
    * @return the {@code SpanContext} associated with this {@code Span}.
    */
-  SpanContext getSpanContext();
+  public abstract SpanContext getSpanContext();
 
   /**
    * Returns {@code true} if this {@code Span} records tracing events (e.g. {@link
@@ -412,10 +416,10 @@ public interface Span extends ImplicitContextKeyed {
    *
    * @return {@code true} if this {@code Span} records tracing events.
    */
-  boolean isRecording();
+  public abstract boolean isRecording();
 
   @Override
-  default Context storeInContext(Context context) {
+  public Context storeInContext(Context context) {
     return context.with(SpanContextKey.KEY, this);
   }
 }

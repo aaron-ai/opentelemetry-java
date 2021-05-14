@@ -28,7 +28,7 @@ public final class TestClock implements Clock {
    */
   public static TestClock create() {
     // Set Time to Tuesday, May 7, 2019 12:00:00 AM GMT-07:00 DST
-    return create(TimeUnit.MILLISECONDS.toNanos(1_557_212_400_000L));
+    return create(TimeUnit.MILLISECONDS.toNanos(1557212400000L));
   }
 
   /**

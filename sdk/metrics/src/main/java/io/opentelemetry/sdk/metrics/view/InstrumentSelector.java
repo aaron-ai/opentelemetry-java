@@ -7,7 +7,6 @@ package io.opentelemetry.sdk.metrics.view;
 
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.annotation.concurrent.Immutable;
 
@@ -51,7 +50,10 @@ public abstract class InstrumentSelector {
 
     /** Sets a specifier for selecting Instruments by name. */
     public final Builder setInstrumentNameRegex(String regex) {
-      return setInstrumentNamePattern(Pattern.compile(Objects.requireNonNull(regex, "regex")));
+      if (regex == null) {
+        throw new NullPointerException("regex");
+      }
+      return setInstrumentNamePattern(Pattern.compile(regex));
     }
 
     /** Returns an InstrumentSelector instance with the content of this builder. */

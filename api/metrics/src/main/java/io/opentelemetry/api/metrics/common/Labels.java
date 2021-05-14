@@ -7,8 +7,8 @@ package io.opentelemetry.api.metrics.common;
 
 import static io.opentelemetry.api.metrics.common.ArrayBackedLabels.sortAndFilterToLabels;
 
+import io.opentelemetry.api.internal.BiConsumer;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -23,10 +23,10 @@ import javax.annotation.concurrent.Immutable;
  * here via the factory methods and the {@link ArrayBackedLabelsBuilder}.
  */
 @Immutable
-public interface Labels {
+public abstract class Labels {
 
   /** Returns a {@link Labels} instance with no attributes. */
-  static Labels empty() {
+  public static Labels empty() {
     return ArrayBackedLabels.empty();
   }
 
@@ -36,7 +36,7 @@ public interface Labels {
   }
 
   /** Returns a {@link Labels} instance with a single key-value pair. */
-  static Labels of(String key, String value) {
+  public static Labels of(String key, String value) {
     return sortAndFilterToLabels(key, value);
   }
 
@@ -44,7 +44,7 @@ public interface Labels {
    * Returns a {@link Labels} instance with two key-value pairs. Order of the keys is not preserved.
    * Duplicate keys will be removed.
    */
-  static Labels of(String key1, String value1, String key2, String value2) {
+  public static Labels of(String key1, String value1, String key2, String value2) {
     return sortAndFilterToLabels(key1, value1, key2, value2);
   }
 
@@ -52,7 +52,7 @@ public interface Labels {
    * Returns a {@link Labels} instance with three key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static Labels of(
+  public static Labels of(
       String key1, String value1, String key2, String value2, String key3, String value3) {
     return sortAndFilterToLabels(key1, value1, key2, value2, key3, value3);
   }
@@ -61,7 +61,7 @@ public interface Labels {
    * Returns a {@link Labels} instance with four key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static Labels of(
+  public static Labels of(
       String key1,
       String value1,
       String key2,
@@ -77,7 +77,7 @@ public interface Labels {
    * Returns a {@link Labels} instance with five key-value pairs. Order of the keys is not
    * preserved. Duplicate keys will be removed.
    */
-  static Labels of(
+  public static Labels of(
       String key1,
       String value1,
       String key2,
@@ -97,26 +97,26 @@ public interface Labels {
   }
 
   /** Returns a {@link Labels} instance with the provided {@code keyValueLabelPairs}. */
-  static Labels of(String... keyValueLabelPairs) {
+  public static Labels of(String... keyValueLabelPairs) {
     return sortAndFilterToLabels((Object[]) keyValueLabelPairs);
   }
 
   /** Iterates over all the key-value pairs of labels contained by this instance. */
-  void forEach(BiConsumer<? super String, ? super String> consumer);
+  public abstract void forEach(BiConsumer<? super String, ? super String> consumer);
 
   /** The number of key-value pairs of labels in this instance. */
-  int size();
+  public abstract int size();
 
   /** Returns the value for the given {@code key}, or {@code null} if the key is not present. */
   @Nullable
-  String get(String key);
+  public abstract String get(String key);
 
   /** Returns whether this instance is empty (contains no labels). */
-  boolean isEmpty();
+  public abstract boolean isEmpty();
 
   /** Returns a read-only view of these {@link Labels} as a {@link Map}. */
-  Map<String, String> asMap();
+  public abstract Map<String, String> asMap();
 
   /** Create a {@link LabelsBuilder} pre-populated with the contents of this Labels instance. */
-  LabelsBuilder toBuilder();
+  public abstract LabelsBuilder toBuilder();
 }

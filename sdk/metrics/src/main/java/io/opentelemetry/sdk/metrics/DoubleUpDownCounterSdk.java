@@ -10,6 +10,7 @@ import io.opentelemetry.api.metrics.DoubleUpDownCounter;
 import io.opentelemetry.api.metrics.DoubleUpDownCounterBuilder;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.sdk.metrics.aggregator.AggregatorHandle;
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -83,7 +84,14 @@ final class DoubleUpDownCounterSdk extends AbstractSynchronousInstrument
 
     @Override
     public DoubleUpDownCounterSdk build() {
-      return buildInstrument(DoubleUpDownCounterSdk::new);
+      return buildInstrument(
+          new BiFunction<InstrumentDescriptor, SynchronousInstrumentAccumulator<?>, DoubleUpDownCounterSdk>() {
+            @Override
+            public DoubleUpDownCounterSdk apply(InstrumentDescriptor instrumentDescriptor,
+                SynchronousInstrumentAccumulator<?> synchronousInstrumentAccumulator) {
+              return new DoubleUpDownCounterSdk(instrumentDescriptor, synchronousInstrumentAccumulator);
+            }
+          });
     }
   }
 }

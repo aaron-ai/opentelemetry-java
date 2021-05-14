@@ -11,7 +11,7 @@ import javax.annotation.concurrent.Immutable;
 
 /** Data representation of a event. */
 @Immutable
-public interface EventData {
+public abstract class EventData {
 
   /**
    * Returns a new immutable {@link EventData}.
@@ -21,7 +21,7 @@ public interface EventData {
    * @param attributes the attributes of the {@link EventData}.
    * @return a new immutable {@link EventData}
    */
-  static EventData create(long epochNanos, String name, Attributes attributes) {
+  public static EventData create(long epochNanos, String name, Attributes attributes) {
     return ImmutableEventData.create(epochNanos, name, attributes);
   }
 
@@ -34,7 +34,7 @@ public interface EventData {
    * @param totalAttributeCount the total number of attributes for this {@code} Event.
    * @return a new immutable {@link EventData}
    */
-  static EventData create(
+  public static EventData create(
       long epochNanos, String name, Attributes attributes, int totalAttributeCount) {
     return ImmutableEventData.create(epochNanos, name, attributes, totalAttributeCount);
   }
@@ -44,21 +44,21 @@ public interface EventData {
    *
    * @return the name of the {@link EventData}.
    */
-  String getName();
+  public abstract String getName();
 
   /**
    * Return the attributes of the {@link EventData}.
    *
    * @return the attributes of the {@link EventData}.
    */
-  Attributes getAttributes();
+  public abstract Attributes getAttributes();
 
   /**
    * Returns the epoch time in nanos of this event.
    *
    * @return the epoch time in nanos of this event.
    */
-  long getEpochNanos();
+  public abstract long getEpochNanos();
 
   /**
    * The total number of attributes that were recorded on this Event. This number may be larger than
@@ -68,14 +68,14 @@ public interface EventData {
    *
    * @return The total number of attributes on this event.
    */
-  int getTotalAttributeCount();
+  public abstract int getTotalAttributeCount();
 
   /**
    * Returns the dropped attributes count of this event.
    *
    * @return the dropped attributes count of this event.
    */
-  default int getDroppedAttributesCount() {
+  public int getDroppedAttributesCount() {
     return getTotalAttributeCount() - getAttributes().size();
   }
 }

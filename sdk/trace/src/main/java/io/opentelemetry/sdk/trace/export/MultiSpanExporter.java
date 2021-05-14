@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  * <p>Can be used to export to multiple backends using the same {@code SpanProcessor} like a {@code
  * SimpleSampledSpansProcessor} or a {@code BatchSampledSpansProcessor}.
  */
-final class MultiSpanExporter implements SpanExporter {
+final class MultiSpanExporter extends SpanExporter {
   private static final Logger logger = Logger.getLogger(MultiSpanExporter.class.getName());
 
   private final SpanExporter[] spanExporters;
@@ -31,13 +31,13 @@ final class MultiSpanExporter implements SpanExporter {
    * @param spanExporters the exporters spans should be sent to
    * @return the aggregate span exporter
    */
-  static SpanExporter create(List<SpanExporter> spanExporters) {
+  public static SpanExporter create(List<SpanExporter> spanExporters) {
     return new MultiSpanExporter(spanExporters.toArray(new SpanExporter[0]));
   }
 
   @Override
   public CompletableResultCode export(Collection<SpanData> spans) {
-    List<CompletableResultCode> results = new ArrayList<>(spanExporters.length);
+    List<CompletableResultCode> results = new ArrayList<CompletableResultCode>(spanExporters.length);
     for (SpanExporter spanExporter : spanExporters) {
       final CompletableResultCode exportResult;
       try {
@@ -60,7 +60,7 @@ final class MultiSpanExporter implements SpanExporter {
    */
   @Override
   public CompletableResultCode flush() {
-    List<CompletableResultCode> results = new ArrayList<>(spanExporters.length);
+    List<CompletableResultCode> results = new ArrayList<CompletableResultCode>(spanExporters.length);
     for (SpanExporter spanExporter : spanExporters) {
       final CompletableResultCode flushResult;
       try {
@@ -78,7 +78,7 @@ final class MultiSpanExporter implements SpanExporter {
 
   @Override
   public CompletableResultCode shutdown() {
-    List<CompletableResultCode> results = new ArrayList<>(spanExporters.length);
+    List<CompletableResultCode> results = new ArrayList<CompletableResultCode>(spanExporters.length);
     for (SpanExporter spanExporter : spanExporters) {
       final CompletableResultCode shutdownResult;
       try {

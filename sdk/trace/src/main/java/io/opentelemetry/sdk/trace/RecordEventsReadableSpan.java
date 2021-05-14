@@ -37,7 +37,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 /** Implementation for the {@link Span} class that records trace events. */
 @ThreadSafe
-final class RecordEventsReadableSpan implements ReadWriteSpan {
+final class RecordEventsReadableSpan extends ReadWriteSpan {
 
   private static final Logger logger = Logger.getLogger(RecordEventsReadableSpan.class.getName());
 
@@ -117,7 +117,7 @@ final class RecordEventsReadableSpan implements ReadWriteSpan {
     this.clock = clock;
     this.startEpochNanos = startEpochNanos;
     this.attributes = attributes;
-    this.events = new ArrayList<>();
+    this.events = new ArrayList<EventData>();
     this.spanLimits = spanLimits;
   }
 
@@ -489,7 +489,7 @@ final class RecordEventsReadableSpan implements ReadWriteSpan {
       return Collections.unmodifiableList(events);
     }
 
-    return Collections.unmodifiableList(new ArrayList<>(events));
+    return Collections.unmodifiableList(new ArrayList<EventData>(events));
   }
 
   @GuardedBy("lock")

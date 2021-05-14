@@ -9,14 +9,6 @@ import com.google.auto.value.AutoValue;
 import io.opentelemetry.api.trace.Span;
 import javax.annotation.concurrent.Immutable;
 
-/**
- * Class that holds limits enforced during span recording.
- *
- * <p>Note: To allow dynamic updates of {@link SpanLimits} you should register a {@link
- * java.util.function.Supplier} with {@link
- * io.opentelemetry.sdk.trace.SdkTracerProviderBuilder#setSpanLimits(java.util.function.Supplier)}
- * which supplies dynamic configs when queried.
- */
 @AutoValue
 @Immutable
 public abstract class SpanLimits {

@@ -12,7 +12,7 @@ import javax.annotation.concurrent.Immutable;
  * String metadata value.
  */
 @Immutable
-public interface BaggageEntryMetadata {
+public abstract class BaggageEntryMetadata {
 
   /** Returns an empty {@link BaggageEntryMetadata}. */
   static BaggageEntryMetadata empty() {
@@ -20,10 +20,10 @@ public interface BaggageEntryMetadata {
   }
 
   /** Returns a new {@link BaggageEntryMetadata} with the given value. */
-  static BaggageEntryMetadata create(String metadata) {
+  public static BaggageEntryMetadata create(String metadata) {
     return ImmutableEntryMetadata.create(metadata);
   }
 
   /** Returns the String value of this {@link BaggageEntryMetadata}. */
-  String getValue();
+  public abstract String getValue();
 }

@@ -5,7 +5,7 @@
 
 package io.opentelemetry.api.metrics;
 
-import java.util.function.Consumer;
+import io.opentelemetry.api.metrics.common.Consumer;
 
 /** Builder class for {@link LongValueObserver}. */
 public interface LongValueObserverBuilder

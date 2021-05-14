@@ -11,12 +11,17 @@ import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.List;
 
-final class HistogramAggregatorFactory implements AggregatorFactory {
+final class HistogramAggregatorFactory extends AggregatorFactory {
   private final double[] boundaries;
   private final AggregationTemporality temporality;
 
   HistogramAggregatorFactory(List<Double> boundaries, AggregationTemporality temporality) {
-    this.boundaries = boundaries.stream().mapToDouble(i -> i).toArray();
+    double[] target = new double[boundaries.size()];
+    for (int i = 0; i < target.length; i++) {
+      target[i] = boundaries.get(i);
+    }
+    this.boundaries = target;
+
     this.temporality = temporality;
 
     for (double v : this.boundaries) {

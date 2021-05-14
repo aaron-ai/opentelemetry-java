@@ -18,7 +18,7 @@ final class ArrayBasedTraceStateBuilder implements TraceStateBuilder {
   // Needs to be in this class to avoid initialization deadlock because super class depends on
   // subclass (the auto-value generate class).
   private static final ArrayBasedTraceState EMPTY =
-      ArrayBasedTraceState.create(Collections.emptyList());
+      ArrayBasedTraceState.create(Collections.<String>emptyList());
 
   private static final int MAX_KEY_VALUE_PAIRS = 32;
   private static final int KEY_MAX_SIZE = 256;
@@ -59,7 +59,7 @@ final class ArrayBasedTraceStateBuilder implements TraceStateBuilder {
     }
     if (entries == null) {
       // Copy entries from the parent.
-      entries = new ArrayList<>(parent.getEntries());
+      entries = new ArrayList<String>(parent.getEntries());
     }
     removeEntry(key);
     // Inserts the element at the front of this list. (note: probably pretty inefficient with an
@@ -76,7 +76,7 @@ final class ArrayBasedTraceStateBuilder implements TraceStateBuilder {
     }
     if (entries == null) {
       // Copy entries from the parent.
-      entries = new ArrayList<>(parent.getEntries());
+      entries = new ArrayList<String>(parent.getEntries());
     }
     removeEntry(key);
     return this;

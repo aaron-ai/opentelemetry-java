@@ -23,13 +23,13 @@ package io.opentelemetry.context;
 import static java.lang.Thread.currentThread;
 
 import io.opentelemetry.context.internal.shaded.WeakConcurrentMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * A {@link ContextStorage} which keeps track of opened and closed {@link Scope}s, reporting caller
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * there are any scopes that have been opened but not closed yet. This could be called at the end of
  * a unit test to ensure the tested code cleaned up scopes correctly.
  */
-final class StrictContextStorage implements ContextStorage, AutoCloseable {
+final class StrictContextStorage extends ContextStorage {
 
   /**
    * Returns a new {@link StrictContextStorage} which delegates to the provided {@link
@@ -127,7 +127,6 @@ final class StrictContextStorage implements ContextStorage, AutoCloseable {
    * @throws AssertionError if any scopes were left unclosed.
    */
   // AssertionError to ensure test runners render the stack trace
-  @Override
   public void close() {
     pendingScopes.expungeStaleEntries();
     List<CallerStackTrace> leaked = pendingScopes.drainPendingCallers();
@@ -142,7 +141,7 @@ final class StrictContextStorage implements ContextStorage, AutoCloseable {
     }
   }
 
-  final class StrictScope implements Scope {
+  final class StrictScope extends Scope {
     final Scope delegate;
     final CallerStackTrace caller;
 
@@ -232,7 +231,7 @@ final class StrictContextStorage implements ContextStorage, AutoCloseable {
   static class PendingScopes extends WeakConcurrentMap<Scope, CallerStackTrace> {
 
     static PendingScopes create() {
-      return new PendingScopes(new ConcurrentHashMap<>());
+      return new PendingScopes(new ConcurrentHashMap<WeakKey<Scope>, CallerStackTrace>());
     }
 
     // We need to explicitly pass a map to the constructor because we otherwise cannot remove from
@@ -252,8 +251,12 @@ final class StrictContextStorage implements ContextStorage, AutoCloseable {
     }
 
     List<CallerStackTrace> drainPendingCallers() {
-      List<CallerStackTrace> pendingCallers =
-          map.values().stream().filter(caller -> !caller.closed).collect(Collectors.toList());
+      List<CallerStackTrace> pendingCallers = new ArrayList<CallerStackTrace>();
+      for (CallerStackTrace trace : map.values()) {
+        if (!trace.closed) {
+          pendingCallers.add(trace);
+        }
+      }
       map.clear();
       return pendingCallers;
     }

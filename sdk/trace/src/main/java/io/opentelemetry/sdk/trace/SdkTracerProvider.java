@@ -8,15 +8,15 @@ package io.opentelemetry.sdk.trace;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.TracerProvider;
+import io.opentelemetry.context.Function;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.internal.ComponentRegistry;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
  * OpenTelemetry}. However, if you need a custom implementation of the factory, you can create one
  * as needed.
  */
-public final class SdkTracerProvider implements TracerProvider, Closeable {
+public final class SdkTracerProvider extends TracerProvider {
   private static final Logger logger = Logger.getLogger(SdkTracerProvider.class.getName());
   static final String DEFAULT_TRACER_NAME = "";
   private final TracerSharedState sharedState;
@@ -53,9 +53,13 @@ public final class SdkTracerProvider implements TracerProvider, Closeable {
     this.sharedState =
         new TracerSharedState(
             clock, idsGenerator, resource, spanLimitsSupplier, sampler, spanProcessors);
-    this.tracerSdkComponentRegistry =
-        new ComponentRegistry<>(
-            instrumentationLibraryInfo -> new SdkTracer(sharedState, instrumentationLibraryInfo));
+    this.tracerSdkComponentRegistry = new ComponentRegistry<SdkTracer>(
+        new Function<InstrumentationLibraryInfo, SdkTracer>() {
+          @Override
+          public SdkTracer apply(InstrumentationLibraryInfo instrumentationLibraryInfo) {
+            return new SdkTracer(sharedState, instrumentationLibraryInfo);
+          }
+        });
   }
 
   @Override
@@ -130,7 +134,6 @@ public final class SdkTracerProvider implements TracerProvider, Closeable {
    * result in undefined behavior. It should be considered a terminal operation for the SDK
    * implementation.
    */
-  @Override
   public void close() {
     shutdown().join(10, TimeUnit.SECONDS);
   }

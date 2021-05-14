@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-final class MultiTextMapPropagator implements TextMapPropagator {
+final class MultiTextMapPropagator extends TextMapPropagator {
   private final TextMapPropagator[] textPropagators;
   private final Collection<String> allFields;
 
@@ -35,12 +35,12 @@ final class MultiTextMapPropagator implements TextMapPropagator {
   }
 
   private static List<String> getAllFields(TextMapPropagator[] textPropagators) {
-    Set<String> fields = new LinkedHashSet<>();
+    Set<String> fields = new LinkedHashSet<String>();
     for (TextMapPropagator textPropagator : textPropagators) {
       fields.addAll(textPropagator.fields());
     }
 
-    return new ArrayList<>(fields);
+    return new ArrayList<String>(fields);
   }
 
   @Override

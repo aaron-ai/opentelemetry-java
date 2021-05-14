@@ -7,8 +7,8 @@ package io.opentelemetry.api.baggage;
 
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ImplicitContextKeyed;
+import io.opentelemetry.api.internal.BiConsumer;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -27,15 +27,15 @@ import javax.annotation.concurrent.Immutable;
  * here via the factory methods and the {@link BaggageBuilder}.
  */
 @Immutable
-public interface Baggage extends ImplicitContextKeyed {
+public abstract class Baggage extends ImplicitContextKeyed {
 
   /** Baggage with no entries. */
-  static Baggage empty() {
+  public static Baggage empty() {
     return ImmutableBaggage.empty();
   }
 
   /** Creates a new {@link BaggageBuilder} for creating Baggage. */
-  static BaggageBuilder builder() {
+  public static BaggageBuilder builder() {
     return ImmutableBaggage.builder();
   }
 
@@ -43,7 +43,7 @@ public interface Baggage extends ImplicitContextKeyed {
    * Returns Baggage from the current {@link Context}, falling back to empty Baggage if none is in
    * the current Context.
    */
-  static Baggage current() {
+  public static Baggage current() {
     return fromContext(Context.current());
   }
 
@@ -51,7 +51,7 @@ public interface Baggage extends ImplicitContextKeyed {
    * Returns the {@link Baggage} from the specified {@link Context}, falling back to a empty {@link
    * Baggage} if there is no baggage in the context.
    */
-  static Baggage fromContext(Context context) {
+  public static Baggage fromContext(Context context) {
     Baggage baggage = context.get(BaggageContextKey.KEY);
     return baggage != null ? baggage : empty();
   }
@@ -61,28 +61,28 @@ public interface Baggage extends ImplicitContextKeyed {
    * baggage in the context.
    */
   @Nullable
-  static Baggage fromContextOrNull(Context context) {
+  public static Baggage fromContextOrNull(Context context) {
     return context.get(BaggageContextKey.KEY);
   }
 
   @Override
-  default Context storeInContext(Context context) {
+  public Context storeInContext(Context context) {
     return context.with(BaggageContextKey.KEY, this);
   }
 
   /** Returns the number of entries in this {@link Baggage}. */
-  int size();
+  public abstract int size();
 
   /** Returns whether this {@link Baggage} is empty, containing no entries. */
-  default boolean isEmpty() {
+  public boolean isEmpty() {
     return size() == 0;
   }
 
   /** Iterates over all the entries in this {@link Baggage}. */
-  void forEach(BiConsumer<? super String, ? super BaggageEntry> consumer);
+  public abstract void forEach(BiConsumer<? super String, ? super BaggageEntry> consumer);
 
   /** Returns a read-only view of this {@link Baggage} as a {@link Map}. */
-  Map<String, BaggageEntry> asMap();
+  public abstract Map<String, BaggageEntry> asMap();
 
   /**
    * Returns the {@code String} value associated with the given key, without metadata.
@@ -92,11 +92,11 @@ public interface Baggage extends ImplicitContextKeyed {
    *     given {@code entryKey} is in this {@code Baggage}.
    */
   @Nullable
-  String getEntryValue(String entryKey);
+  public abstract String getEntryValue(String entryKey);
 
   /**
    * Create a Builder pre-initialized with the contents of this Baggage. The returned Builder will
    * be set to not use an implicit parent, so any parent assignment must be done manually.
    */
-  BaggageBuilder toBuilder();
+  public abstract BaggageBuilder toBuilder();
 }

@@ -21,7 +21,7 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public final class SpanId {
-  private static final ThreadLocal<char[]> charBuffer = new ThreadLocal<>();
+  private static final ThreadLocal<char[]> charBuffer = new ThreadLocal<char[]>();
 
   private static final int BYTES_LENGTH = 8;
   private static final int HEX_LENGTH = 2 * BYTES_LENGTH;

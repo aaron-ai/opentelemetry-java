@@ -54,14 +54,16 @@ public final class IntervalMetricReader {
       Thread.currentThread().interrupt();
     } finally {
       final CompletableResultCode shutdownResult = exporter.shutdown();
-      shutdownResult.whenComplete(
-          () -> {
-            if (!shutdownResult.isSuccess()) {
-              result.fail();
-            } else {
-              result.succeed();
-            }
-          });
+      shutdownResult.whenComplete(new Runnable() {
+        @Override
+        public void run() {
+          if (!shutdownResult.isSuccess()) {
+            result.fail();
+          } else {
+            result.succeed();
+          }
+        }
+      });
     }
     return result;
   }
@@ -126,20 +128,22 @@ public final class IntervalMetricReader {
       final CompletableResultCode flushResult = new CompletableResultCode();
       if (exportAvailable.compareAndSet(true, false)) {
         try {
-          List<MetricData> metricsList = new ArrayList<>();
+          List<MetricData> metricsList = new ArrayList<MetricData>();
           for (MetricProducer metricProducer : internalState.getMetricProducers()) {
             metricsList.addAll(metricProducer.collectAllMetrics());
           }
           final CompletableResultCode result =
               internalState.getMetricExporter().export(Collections.unmodifiableList(metricsList));
-          result.whenComplete(
-              () -> {
-                if (!result.isSuccess()) {
-                  logger.log(Level.FINE, "Exporter failed");
-                }
-                flushResult.succeed();
-                exportAvailable.set(true);
-              });
+          result.whenComplete(new Runnable() {
+            @Override
+            public void run() {
+              if (!result.isSuccess()) {
+                logger.log(Level.FINE, "Exporter failed");
+              }
+              flushResult.succeed();
+              exportAvailable.set(true);
+            }
+          });
         } catch (Throwable t) {
           exportAvailable.set(true);
           logger.log(Level.WARNING, "Exporter threw an Exception", t);
@@ -160,7 +164,7 @@ public final class IntervalMetricReader {
   @AutoValue
   @Immutable
   abstract static class InternalState {
-    static final long DEFAULT_INTERVAL_MILLIS = 60_000;
+    static final long DEFAULT_INTERVAL_MILLIS = 60000;
 
     abstract MetricExporter getMetricExporter();
 

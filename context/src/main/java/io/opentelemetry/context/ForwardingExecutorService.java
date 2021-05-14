@@ -52,7 +52,7 @@ abstract class ForwardingExecutorService implements ExecutorService {
 
   protected static <T> Collection<? extends Callable<T>> wrap(
       Context context, Collection<? extends Callable<T>> tasks) {
-    List<Callable<T>> wrapped = new ArrayList<>();
+    List<Callable<T>> wrapped = new ArrayList<Callable<T>>();
     for (Callable<T> task : tasks) {
       wrapped.add(context.wrap(task));
     }

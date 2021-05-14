@@ -5,13 +5,13 @@
 
 package io.opentelemetry.sdk.internal;
 
+import io.opentelemetry.context.Function;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /**
@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  */
 public final class ComponentRegistry<V> {
 
-  private final ConcurrentMap<InstrumentationLibraryInfo, V> registry = new ConcurrentHashMap<>();
+  private final ConcurrentMap<InstrumentationLibraryInfo, V> registry = new ConcurrentHashMap<InstrumentationLibraryInfo, V>();
   private final Function<InstrumentationLibraryInfo, V> factory;
 
   public ComponentRegistry(Function<InstrumentationLibraryInfo, V> factory) {
@@ -69,6 +69,6 @@ public final class ComponentRegistry<V> {
    * @return a {@code Collection} view of the registered components.
    */
   public final Collection<V> getComponents() {
-    return Collections.unmodifiableCollection(new ArrayList<>(registry.values()));
+    return Collections.unmodifiableCollection(new ArrayList<V>(registry.values()));
   }
 }

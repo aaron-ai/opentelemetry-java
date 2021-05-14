@@ -8,7 +8,7 @@ package io.opentelemetry.exporter.otlp.trace;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.WireFormat;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import javax.annotation.Nullable;
 
@@ -113,7 +113,11 @@ final class MarshalerUtil {
     if (value == null || value.isEmpty()) {
       return EMPTY_BYTES;
     }
-    return value.getBytes(StandardCharsets.UTF_8);
+    try {
+      return value.getBytes("UTF-8");
+    } catch (UnsupportedEncodingException ignore) {
+      return null;
+    }
   }
 
   private MarshalerUtil() {}

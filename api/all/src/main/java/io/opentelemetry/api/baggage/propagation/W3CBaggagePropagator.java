@@ -9,7 +9,9 @@ import static java.util.Collections.singletonList;
 
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.baggage.BaggageBuilder;
+import io.opentelemetry.api.baggage.BaggageEntry;
 import io.opentelemetry.api.baggage.BaggageEntryMetadata;
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
@@ -21,7 +23,7 @@ import javax.annotation.Nullable;
 /**
  * {@link TextMapPropagator} that implements the W3C specification for baggage header propagation.
  */
-public final class W3CBaggagePropagator implements TextMapPropagator {
+public final class W3CBaggagePropagator extends TextMapPropagator {
 
   private static final String FIELD = "baggage";
   private static final List<String> FIELDS = singletonList(FIELD);
@@ -48,16 +50,18 @@ public final class W3CBaggagePropagator implements TextMapPropagator {
     if (baggage.isEmpty()) {
       return;
     }
-    StringBuilder headerContent = new StringBuilder();
-    baggage.forEach(
-        (key, baggageEntry) -> {
-          headerContent.append(key).append("=").append(baggageEntry.getValue());
-          String metadataValue = baggageEntry.getMetadata().getValue();
-          if (metadataValue != null && !metadataValue.isEmpty()) {
-            headerContent.append(";").append(metadataValue);
-          }
-          headerContent.append(",");
-        });
+    final StringBuilder headerContent = new StringBuilder();
+    baggage.forEach(new BiConsumer<String, BaggageEntry>() {
+      @Override
+      public void accept(String key, BaggageEntry baggageEntry) {
+        headerContent.append(key).append("=").append(baggageEntry.getValue());
+        String metadataValue = baggageEntry.getMetadata().getValue();
+        if (metadataValue != null && !metadataValue.isEmpty()) {
+          headerContent.append(";").append(metadataValue);
+        }
+        headerContent.append(",");
+      }
+    });
     if (headerContent.length() > 0) {
       headerContent.setLength(headerContent.length() - 1);
       setter.set(carrier, FIELD, headerContent.toString());

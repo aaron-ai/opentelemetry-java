@@ -7,7 +7,6 @@ package io.opentelemetry.exporter.otlp.metrics;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 import static io.opentelemetry.api.internal.Utils.checkArgument;
-import static java.util.Objects.requireNonNull;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -15,7 +14,6 @@ import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
@@ -49,7 +47,9 @@ public final class OtlpGrpcMetricExporterBuilder {
    * unset, defaults to {@value DEFAULT_TIMEOUT_SECS}s.
    */
   public OtlpGrpcMetricExporterBuilder setTimeout(long timeout, TimeUnit unit) {
-    requireNonNull(unit, "unit");
+    if (unit == null) {
+      throw new NullPointerException("unit");
+    }
     checkArgument(timeout >= 0, "timeout must be non-negative");
     timeoutNanos = unit.toNanos(timeout);
     return this;
@@ -59,17 +59,20 @@ public final class OtlpGrpcMetricExporterBuilder {
    * Sets the maximum time to wait for the collector to process an exported batch of metrics. If
    * unset, defaults to {@value DEFAULT_TIMEOUT_SECS}s.
    */
-  public OtlpGrpcMetricExporterBuilder setTimeout(Duration timeout) {
-    requireNonNull(timeout, "timeout");
-    return setTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS);
-  }
+  // Block for Java 6
+//  public OtlpGrpcMetricExporterBuilder setTimeout(Duration timeout) {
+//    requireNonNull(timeout, "timeout");
+//    return setTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS);
+//  }
 
   /**
    * Sets the OTLP endpoint to connect to. If unset, defaults to {@value DEFAULT_ENDPOINT_URL}. The
    * endpoint must start with either http:// or https://.
    */
   public OtlpGrpcMetricExporterBuilder setEndpoint(String endpoint) {
-    requireNonNull(endpoint, "endpoint");
+    if (endpoint == null) {
+      throw new NullPointerException("endpoint");
+    }
 
     URI uri;
     try {

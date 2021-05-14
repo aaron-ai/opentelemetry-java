@@ -35,7 +35,7 @@ final class DoubleHistogramAggregator extends AbstractAggregator<HistogramAccumu
     super(resource, instrumentationLibraryInfo, instrumentDescriptor, stateful);
     this.boundaries = boundaries;
 
-    List<Double> boundaryList = new ArrayList<>(this.boundaries.length);
+    List<Double> boundaryList = new ArrayList<Double>(this.boundaries.length);
     for (double v : this.boundaries) {
       boundaryList.add(v);
     }

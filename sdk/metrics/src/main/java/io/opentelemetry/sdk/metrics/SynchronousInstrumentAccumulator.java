@@ -14,7 +14,6 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.processor.LabelsProcessor;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -31,9 +30,9 @@ final class SynchronousInstrumentAccumulator<T> extends AbstractAccumulator {
       InstrumentDescriptor descriptor) {
     Aggregator<T> aggregator =
         getAggregator(meterProviderSharedState, meterSharedState, descriptor);
-    return new SynchronousInstrumentAccumulator<>(
+    return new SynchronousInstrumentAccumulator<T>(
         aggregator,
-        new InstrumentProcessor<>(aggregator, meterProviderSharedState.getStartEpochNanos()),
+        new InstrumentProcessor<T>(aggregator, meterProviderSharedState.getStartEpochNanos()),
         getLabelsProcessor(meterProviderSharedState, meterSharedState, descriptor));
   }
 
@@ -41,7 +40,7 @@ final class SynchronousInstrumentAccumulator<T> extends AbstractAccumulator {
       Aggregator<T> aggregator,
       InstrumentProcessor<T> instrumentProcessor,
       LabelsProcessor labelsProcessor) {
-    aggregatorLabels = new ConcurrentHashMap<>();
+    aggregatorLabels = new ConcurrentHashMap<Labels, AggregatorHandle<T>>();
     collectLock = new ReentrantLock();
     this.aggregator = aggregator;
     this.instrumentProcessor = instrumentProcessor;
@@ -49,7 +48,9 @@ final class SynchronousInstrumentAccumulator<T> extends AbstractAccumulator {
   }
 
   AggregatorHandle<?> bind(Labels labels) {
-    Objects.requireNonNull(labels, "labels");
+    if (labels == null) {
+      throw new NullPointerException("labels");
+    }
     labels = labelsProcessor.onLabelsBound(Context.current(), labels);
     AggregatorHandle<T> aggregatorHandle = aggregatorLabels.get(labels);
     if (aggregatorHandle != null && aggregatorHandle.acquire()) {

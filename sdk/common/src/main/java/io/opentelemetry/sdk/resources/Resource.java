@@ -15,9 +15,9 @@ import com.google.auto.value.extension.memoized.Memoized;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.api.internal.StringUtils;
 import io.opentelemetry.api.internal.Utils;
-import java.util.Objects;
 import java.util.Properties;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -90,7 +90,10 @@ public abstract class Resource {
    *     ASCII string or exceed {@link #MAX_LENGTH} characters.
    */
   public static Resource create(Attributes attributes) {
-    checkAttributes(Objects.requireNonNull(attributes, "attributes"));
+    if (attributes == null) {
+      throw new NullPointerException("attributes");
+    }
+    checkAttributes(attributes);
     return new AutoValue_Resource(attributes);
   }
 
@@ -139,12 +142,16 @@ public abstract class Resource {
   }
 
   private static void checkAttributes(Attributes attributes) {
-    attributes.forEach(
-        (key, value) -> {
-          Utils.checkArgument(
-              isValidAndNotEmpty(key), "Attribute key" + ERROR_MESSAGE_INVALID_CHARS);
-          Objects.requireNonNull(value, "Attribute value" + ERROR_MESSAGE_INVALID_VALUE);
-        });
+    attributes.forEach(new BiConsumer<AttributeKey<?>, Object>() {
+      @Override
+      public void accept(AttributeKey<?> key, Object value) {
+        Utils.checkArgument(
+            isValidAndNotEmpty(key), "Attribute key" + ERROR_MESSAGE_INVALID_CHARS);
+        if (value == null) {
+          throw new NullPointerException("Attribute value" + ERROR_MESSAGE_INVALID_VALUE);
+        }
+      }
+    });
   }
 
   /**

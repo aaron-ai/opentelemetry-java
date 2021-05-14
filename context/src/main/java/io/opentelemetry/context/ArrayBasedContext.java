@@ -25,7 +25,7 @@ package io.opentelemetry.context;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 
-final class ArrayBasedContext implements Context {
+final class ArrayBasedContext extends Context {
 
   private static final Context ROOT = new ArrayBasedContext(new Object[0]);
 
@@ -41,7 +41,7 @@ final class ArrayBasedContext implements Context {
   // the class loader automatically resolves its super classes (interfaces), which in this case is
   // Context, which would be the same class (interface) being instrumented at that time,
   // which would lead to the JVM throwing a LinkageError "attempted duplicate interface definition"
-  static Context root() {
+  public static Context root() {
     return ROOT;
   }
 

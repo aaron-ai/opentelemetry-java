@@ -16,7 +16,11 @@ public final class JcTools {
    * Returns a new {@link Queue} appropriate for use with multiple producers and a single consumer.
    */
   public static <T> Queue<T> newMpscArrayQueue(int capacity) {
-    return new MpscArrayQueue<>(capacity);
+    return new MpscArrayQueue<T>(capacity);
+  }
+
+  public static <T> Queue<T> newMpscArrayQueue(int capacity, Queue<T> queue) {
+    return new MpscArrayQueue<T>(capacity);
   }
 
   /**

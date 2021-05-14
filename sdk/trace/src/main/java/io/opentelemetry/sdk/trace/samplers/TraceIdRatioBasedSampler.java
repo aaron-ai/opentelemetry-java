@@ -23,7 +23,7 @@ import javax.annotation.concurrent.Immutable;
  */
 @AutoValue
 @Immutable
-abstract class TraceIdRatioBasedSampler implements Sampler {
+abstract class TraceIdRatioBasedSampler extends Sampler {
 
   TraceIdRatioBasedSampler() {}
 

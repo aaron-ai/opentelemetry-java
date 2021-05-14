@@ -14,12 +14,12 @@ package io.opentelemetry.context.propagation;
  *
  * <p>The propagation fields retrieved from all registered propagators are de-duplicated.
  */
-final class DefaultContextPropagators implements ContextPropagators {
+final class DefaultContextPropagators extends ContextPropagators {
 
   private static final ContextPropagators NOOP =
       new DefaultContextPropagators(NoopTextMapPropagator.getInstance());
 
-  static ContextPropagators noop() {
+  public static ContextPropagators noop() {
     return NOOP;
   }
 

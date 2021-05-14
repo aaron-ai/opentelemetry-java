@@ -10,7 +10,6 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.List;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 // Represents the shared state/config between all Tracers created by the same TracerProvider.

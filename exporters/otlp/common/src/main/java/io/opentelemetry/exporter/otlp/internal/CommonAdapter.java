@@ -21,7 +21,7 @@ final class CommonAdapter {
       case STRING:
         return makeStringKeyValue(key, (String) value);
       case BOOLEAN:
-        return makeBooleanKeyValue(key, (boolean) value);
+        return makeBooleanKeyValue(key, (Boolean) value);
       case LONG:
         return makeLongKeyValue(key, (Long) value);
       case DOUBLE:

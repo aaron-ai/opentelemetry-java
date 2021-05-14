@@ -31,14 +31,14 @@ package io.opentelemetry.context;
  */
 // ErrorProne false positive, this is used for its type constraint, not only as a bag of statics.
 @SuppressWarnings("InterfaceWithOnlyStatics")
-public interface ContextKey<T> {
+public abstract class ContextKey<T> {
 
   /**
    * Returns a new {@link ContextKey} with the given debug name. The name does not impact behavior
    * and is only for debugging purposes. Multiple different keys with the same name will be separate
    * keys.
    */
-  static <T> ContextKey<T> named(String name) {
-    return new DefaultContextKey<>(name);
+  public static <T> ContextKey<T> named(String name) {
+    return new DefaultContextKey<T>(name);
   }
 }

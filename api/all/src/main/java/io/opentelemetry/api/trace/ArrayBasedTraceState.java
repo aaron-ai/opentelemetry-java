@@ -6,17 +6,17 @@
 package io.opentelemetry.api.trace;
 
 import com.google.auto.value.AutoValue;
+import io.opentelemetry.api.internal.BiConsumer;
 import io.opentelemetry.api.internal.ReadOnlyArrayMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
 @AutoValue
-abstract class ArrayBasedTraceState implements TraceState {
+abstract class ArrayBasedTraceState extends TraceState {
 
   @Override
   @Nullable

@@ -19,7 +19,7 @@ import javax.annotation.concurrent.Immutable;
  */
 @AutoValue
 @Immutable
-abstract class ImmutableStatusData implements StatusData {
+abstract class ImmutableStatusData extends StatusData {
   /**
    * The operation has been validated by an Application developers or Operator to have completed
    * successfully.
@@ -33,7 +33,7 @@ abstract class ImmutableStatusData implements StatusData {
   static final StatusData ERROR = createInternal(StatusCode.ERROR, "");
 
   // Visible for test
-  static final EnumMap<StatusCode, StatusData> codeToStatus = new EnumMap<>(StatusCode.class);
+  static final EnumMap<StatusCode, StatusData> codeToStatus = new EnumMap<StatusCode, StatusData>(StatusCode.class);
 
   static {
     codeToStatus.put(StatusCode.UNSET, StatusData.unset());
@@ -57,7 +57,7 @@ abstract class ImmutableStatusData implements StatusData {
    * @param description the new description of the {@code Status}.
    * @return The newly created {@code Status} with the given description.
    */
-  static StatusData create(StatusCode statusCode, String description) {
+  public static StatusData create(StatusCode statusCode, String description) {
     if (description == null || description.isEmpty()) {
       return codeToStatus.get(statusCode);
     }

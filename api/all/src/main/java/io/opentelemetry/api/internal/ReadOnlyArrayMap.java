@@ -39,7 +39,7 @@ public final class ReadOnlyArrayMap<K, V> extends AbstractMap<K, V> {
     if (array.isEmpty()) {
       return Collections.emptyMap();
     }
-    return new ReadOnlyArrayMap<>(array);
+    return new ReadOnlyArrayMap<K, V>(array);
   }
 
   private final List<Object> array;
@@ -167,7 +167,7 @@ public final class ReadOnlyArrayMap<K, V> extends AbstractMap<K, V> {
   final class EntrySetView extends SetView<Map.Entry<K, V>> {
     @Override
     Map.Entry<K, V> elementAtArrayIndex(int i) {
-      return new AbstractMap.SimpleImmutableEntry<>(key(i), value(i + 1));
+      return new AbstractMap.SimpleImmutableEntry<K, V>(key(i), value(i + 1));
     }
 
     @Override

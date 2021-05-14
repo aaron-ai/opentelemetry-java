@@ -22,7 +22,6 @@
 
 package io.opentelemetry.context;
 
-import com.google.errorprone.annotations.MustBeClosed;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -79,10 +78,10 @@ import javax.annotation.Nullable;
  *
  * @see StrictContextStorage
  */
-public interface Context {
+public abstract class Context {
 
   /** Return the context associated with the current {@link Scope}. */
-  static Context current() {
+  public static Context current() {
     Context current = ContextStorage.get().current();
     return current != null ? current : root();
   }
@@ -95,7 +94,7 @@ public interface Context {
    * you are absolutely sure you need to disregard the current {@link Context} - this almost always
    * is only a workaround hiding an underlying context propagation issue.
    */
-  static Context root() {
+  public static Context root() {
     return ArrayBasedContext.root();
   }
 
@@ -111,8 +110,13 @@ public interface Context {
    *
    * @since 1.1.0
    */
-  static Executor taskWrapping(Executor executor) {
-    return command -> executor.execute(Context.current().wrap(command));
+  public static Executor taskWrapping(final Executor executor) {
+    return new Executor() {
+      @Override
+      public void execute(Runnable command) {
+        executor.execute(Context.current().wrap(command));
+      }
+    };
   }
 
   /**
@@ -129,7 +133,7 @@ public interface Context {
    *
    * @since 1.1.0
    */
-  static ExecutorService taskWrapping(ExecutorService executorService) {
+  public static ExecutorService taskWrapping(ExecutorService executorService) {
     return new CurrentContextExecutorService(executorService);
   }
 
@@ -138,7 +142,7 @@ public interface Context {
    * null} if there is no value for the key in this context.
    */
   @Nullable
-  <V> V get(ContextKey<V> key);
+  public abstract <V> V get(ContextKey<V> key);
 
   /**
    * Returns a new context with the given key value set.
@@ -162,10 +166,10 @@ public interface Context {
    * number of keys and values — combine multiple related items together into a single key instead
    * of separating them. But if the items are unrelated, have separate keys for them.
    */
-  <V> Context with(ContextKey<V> k1, V v1);
+  public abstract <V> Context with(ContextKey<V> k1, V v1);
 
   /** Returns a new {@link Context} with the given {@link ImplicitContextKeyed} set. */
-  default Context with(ImplicitContextKeyed value) {
+  public Context with(ImplicitContextKeyed value) {
     return value.storeInContext(this);
   }
 
@@ -192,8 +196,8 @@ public interface Context {
    * assert Context.current() == prevCtx;
    * }</pre>
    */
-  @MustBeClosed
-  default Scope makeCurrent() {
+//  @MustBeClosed
+  public Scope makeCurrent() {
     return ContextStorage.get().attach(this);
   }
 
@@ -201,10 +205,16 @@ public interface Context {
    * Returns a {@link Runnable} that makes this the {@linkplain Context#current() current context}
    * and then invokes the input {@link Runnable}.
    */
-  default Runnable wrap(Runnable runnable) {
-    return () -> {
-      try (Scope ignored = makeCurrent()) {
-        runnable.run();
+  public Runnable wrap(final Runnable runnable) {
+    return new Runnable() {
+      @Override
+      public void run() {
+        final Scope scope = makeCurrent();
+        try {
+          runnable.run();
+        } finally {
+          scope.close();
+        }
       }
     };
   }
@@ -213,10 +223,16 @@ public interface Context {
    * Returns a {@link Runnable} that makes this the {@linkplain Context#current() current context}
    * and then invokes the input {@link Runnable}.
    */
-  default <T> Callable<T> wrap(Callable<T> callable) {
-    return () -> {
-      try (Scope ignored = makeCurrent()) {
-        return callable.call();
+  public <T> Callable<T> wrap(final Callable<T> callable) {
+    return new Callable<T>() {
+      @Override
+      public T call() throws Exception {
+        Scope scope = makeCurrent();
+        try {
+          return callable.call();
+        } finally {
+          scope.close();
+        }
       }
     };
   }
@@ -225,15 +241,20 @@ public interface Context {
    * Returns an {@link Executor} that will execute callbacks in the given {@code executor}, making
    * this the {@linkplain Context#current() current context} before each execution.
    */
-  default Executor wrap(Executor executor) {
-    return command -> executor.execute(wrap(command));
+  public Executor wrap(final Executor executor) {
+    return new Executor() {
+      @Override
+      public void execute(Runnable command) {
+        executor.execute(wrap(command));
+      }
+    };
   }
 
   /**
    * Returns an {@link ExecutorService} that will execute callbacks in the given {@code executor},
    * making this the {@linkplain Context#current() current context} before each execution.
    */
-  default ExecutorService wrap(ExecutorService executor) {
+  public ExecutorService wrap(ExecutorService executor) {
     return new ContextExecutorService(this, executor);
   }
 
@@ -242,7 +263,7 @@ public interface Context {
    * executor}, making this the {@linkplain Context#current() current context} before each
    * execution.
    */
-  default ScheduledExecutorService wrap(ScheduledExecutorService executor) {
+  public ScheduledExecutorService wrap(ScheduledExecutorService executor) {
     return new ContextScheduledExecutorService(this, executor);
   }
 }

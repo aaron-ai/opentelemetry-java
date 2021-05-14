@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -27,28 +26,34 @@ import javax.annotation.concurrent.Immutable;
  * @param <V> The type of the values contained in this.
  */
 @Immutable
-public abstract class ImmutableKeyValuePairs<K, V> {
+public class ImmutableKeyValuePairs<K, V> {
   private final Object[] data;
 
   /**
    * Sorts and dedupes the key/value pairs in {@code data}. {@code null} values will be removed.
    * Keys must be {@link Comparable}.
    */
-  protected ImmutableKeyValuePairs(Object[] data) {
-    this(data, Comparator.naturalOrder());
+  public ImmutableKeyValuePairs(Object[] data) {
+    this(data, new Comparator<Comparable<Object>>() {
+
+      @Override
+      public int compare(Comparable<Object> c1, Comparable<Object> c2) {
+        return c1.compareTo(c2);
+      }
+    });
   }
 
   /**
    * Sorts and dedupes the key/value pairs in {@code data}. {@code null} values will be removed.
    * Keys will be compared with the given {@link Comparator}.
    */
-  protected ImmutableKeyValuePairs(Object[] data, Comparator<?> keyComparator) {
+  public ImmutableKeyValuePairs(Object[] data, Comparator<?> keyComparator) {
     this.data = sortAndFilter(data, keyComparator);
   }
 
   // TODO: Improve this to avoid one allocation, for the moment only some Builders and the asMap
   //  calls this.
-  protected final List<Object> data() {
+  public final List<Object> data() {
     return Arrays.asList(data);
   }
 

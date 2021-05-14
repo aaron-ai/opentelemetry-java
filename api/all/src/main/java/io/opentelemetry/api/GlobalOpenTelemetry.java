@@ -154,12 +154,18 @@ public final class GlobalOpenTelemetry {
     try {
       Method initialize = openTelemetrySdkAutoConfiguration.getMethod("initialize");
       return (OpenTelemetry) initialize.invoke(null);
-    } catch (NoSuchMethodException | IllegalAccessException e) {
+    } catch (NoSuchMethodException e) {
       throw new IllegalStateException(
           "OpenTelemetrySdkAutoConfiguration detected on classpath "
               + "but could not invoke initialize method. This is a bug in OpenTelemetry.",
           e);
-    } catch (InvocationTargetException t) {
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(
+          "OpenTelemetrySdkAutoConfiguration detected on classpath "
+              + "but could not invoke initialize method. This is a bug in OpenTelemetry.",
+          e);
+    }
+    catch (InvocationTargetException t) {
       logger.log(
           Level.SEVERE,
           "Error automatically configuring OpenTelemetry SDK. OpenTelemetry will not be enabled.",
@@ -174,7 +180,7 @@ public final class GlobalOpenTelemetry {
    * use patterns like {@code (OpenTelemetrySdk) GlobalOpenTelemetry.get()}.
    */
   @ThreadSafe
-  static class ObfuscatedOpenTelemetry implements OpenTelemetry {
+  static class ObfuscatedOpenTelemetry extends OpenTelemetry {
 
     private final OpenTelemetry delegate;
 

@@ -64,7 +64,7 @@ final class LongLastValueAggregator extends AbstractAggregator<Long> {
 
   static final class Handle extends AggregatorHandle<Long> {
     @Nullable private static final Long DEFAULT_VALUE = null;
-    private final AtomicReference<Long> current = new AtomicReference<>(DEFAULT_VALUE);
+    private final AtomicReference<Long> current = new AtomicReference<Long>(DEFAULT_VALUE);
 
     @Override
     protected Long doAccumulateThenReset() {

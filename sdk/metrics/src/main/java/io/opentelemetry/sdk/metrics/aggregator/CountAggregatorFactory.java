@@ -10,7 +10,7 @@ import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.resources.Resource;
 
-final class CountAggregatorFactory implements AggregatorFactory {
+final class CountAggregatorFactory extends AggregatorFactory {
   private final AggregationTemporality temporality;
 
   CountAggregatorFactory(AggregationTemporality temporality) {

@@ -8,7 +8,7 @@ package io.opentelemetry.sdk.metrics.data;
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
-import java.util.Collections;
+import java.util.ArrayList;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -18,19 +18,19 @@ import javax.annotation.concurrent.Immutable;
 @AutoValue
 public abstract class MetricData {
   private static final DoubleGaugeData DEFAULT_DOUBLE_GAUGE_DATA =
-      DoubleGaugeData.create(Collections.emptyList());
+      DoubleGaugeData.create(new ArrayList<DoublePointData>());
   private static final LongGaugeData DEFAULT_LONG_GAUGE_DATA =
-      LongGaugeData.create(Collections.emptyList());
+      LongGaugeData.create(new ArrayList<LongPointData>());
   private static final DoubleSumData DEFAULT_DOUBLE_SUM_DATA =
       DoubleSumData.create(
-          /* isMonotonic= */ false, AggregationTemporality.CUMULATIVE, Collections.emptyList());
+          /* isMonotonic= */ false, AggregationTemporality.CUMULATIVE, new ArrayList<DoublePointData>());
   private static final LongSumData DEFAULT_LONG_SUM_DATA =
       LongSumData.create(
-          /* isMonotonic= */ false, AggregationTemporality.CUMULATIVE, Collections.emptyList());
+          /* isMonotonic= */ false, AggregationTemporality.CUMULATIVE, new ArrayList<LongPointData>());
   private static final DoubleSummaryData DEFAULT_DOUBLE_SUMMARY_DATA =
-      DoubleSummaryData.create(Collections.emptyList());
+      DoubleSummaryData.create(new ArrayList<DoubleSummaryPointData>());
   private static final DoubleHistogramData DEFAULT_DOUBLE_HISTOGRAM_DATA =
-      DoubleHistogramData.create(AggregationTemporality.CUMULATIVE, Collections.emptyList());
+      DoubleHistogramData.create(AggregationTemporality.CUMULATIVE, new ArrayList<DoubleHistogramPointData>());
 
   /**
    * Returns a new MetricData wih a {@link MetricDataType#DOUBLE_GAUGE} type.

@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
  * name is present. TODO: Decide what is the identifier for an Instrument? Only name?
  */
 final class InstrumentRegistry {
-  private final ConcurrentMap<String, AbstractInstrument> registry = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, AbstractInstrument> registry = new ConcurrentHashMap<String, AbstractInstrument>();
 
   /**
    * Registers the given {@code instrument} to this registry. Returns the registered instrument if
@@ -51,6 +51,6 @@ final class InstrumentRegistry {
    * @return a {@code Collection} view of the registered instruments.
    */
   Collection<AbstractInstrument> getInstruments() {
-    return Collections.unmodifiableCollection(new ArrayList<>(registry.values()));
+    return Collections.unmodifiableCollection(new ArrayList<AbstractInstrument>(registry.values()));
   }
 }

@@ -8,8 +8,7 @@ package io.opentelemetry.api.metrics;
 import io.opentelemetry.api.internal.Utils;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.api.metrics.internal.MetricsStringUtils;
-import java.util.Objects;
-import java.util.function.Consumer;
+import io.opentelemetry.api.metrics.common.Consumer;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -31,84 +30,108 @@ final class DefaultMeter implements Meter {
 
   @Override
   public DoubleCounterBuilder doubleCounterBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopDoubleCounter.NoopBuilder();
   }
 
   @Override
   public LongCounterBuilder longCounterBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopLongCounter.NoopBuilder();
   }
 
   @Override
   public DoubleUpDownCounterBuilder doubleUpDownCounterBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopDoubleUpDownCounter.NoopBuilder();
   }
 
   @Override
   public LongUpDownCounterBuilder longUpDownCounterBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopLongUpDownCounter.NoopBuilder();
   }
 
   @Override
   public DoubleValueRecorderBuilder doubleValueRecorderBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopDoubleValueRecorder.NoopBuilder();
   }
 
   @Override
   public LongValueRecorderBuilder longValueRecorderBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopLongValueRecorder.NoopBuilder();
   }
 
   @Override
   public DoubleSumObserverBuilder doubleSumObserverBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopDoubleSumObserver.NoopBuilder();
   }
 
   @Override
   public LongSumObserverBuilder longSumObserverBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopLongSumObserver.NoopBuilder();
   }
 
   @Override
   public DoubleUpDownSumObserverBuilder doubleUpDownSumObserverBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopDoubleUpDownSumObserver.NoopBuilder();
   }
 
   @Override
   public LongUpDownSumObserverBuilder longUpDownSumObserverBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopLongUpDownSumObserver.NoopBuilder();
   }
 
   @Override
   public DoubleValueObserverBuilder doubleValueObserverBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopDoubleValueObserver.NoopBuilder();
   }
 
   @Override
   public LongValueObserverBuilder longValueObserverBuilder(String name) {
-    Objects.requireNonNull(name, "name");
+    if (name == null) {
+      throw new NullPointerException("name");
+    }
     Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
     return new NoopLongValueObserver.NoopBuilder();
   }
@@ -129,7 +152,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public void add(double increment, Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       Utils.checkArgument(increment >= 0.0, COUNTERS_CAN_ONLY_INCREASE);
     }
 
@@ -140,7 +165,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public NoopBoundDoubleCounter bind(Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       return NoopBoundDoubleCounter.INSTANCE;
     }
 
@@ -180,7 +207,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public void add(long increment, Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       Utils.checkArgument(increment >= 0, COUNTERS_CAN_ONLY_INCREASE);
     }
 
@@ -191,7 +220,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public NoopBoundLongCounter bind(Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       return NoopBoundLongCounter.INSTANCE;
     }
 
@@ -231,7 +262,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public void add(double increment, Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
     }
 
     @Override
@@ -241,7 +274,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public NoopBoundDoubleUpDownCounter bind(Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       return NoopBoundDoubleUpDownCounter.INSTANCE;
     }
 
@@ -279,7 +314,8 @@ final class DefaultMeter implements Meter {
 
     @Override
     public void add(long increment, Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null)
+        throw new NullPointerException("labels");
     }
 
     @Override
@@ -289,7 +325,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public NoopBoundLongUpDownCounter bind(Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       return NoopBoundLongUpDownCounter.INSTANCE;
     }
 
@@ -327,7 +365,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public void record(double value, Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
     }
 
     @Override
@@ -337,7 +377,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public NoopBoundDoubleValueRecorder bind(Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       return NoopBoundDoubleValueRecorder.INSTANCE;
     }
 
@@ -375,7 +417,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public void record(long value, Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
     }
 
     @Override
@@ -385,7 +429,9 @@ final class DefaultMeter implements Meter {
 
     @Override
     public NoopBoundLongValueRecorder bind(Labels labels) {
-      Objects.requireNonNull(labels, "labels");
+      if (labels == null) {
+        throw new NullPointerException("labels");
+      }
       return NoopBoundLongValueRecorder.INSTANCE;
     }
 
@@ -431,7 +477,9 @@ final class DefaultMeter implements Meter {
 
       @Override
       public DoubleSumObserverBuilder setUpdater(Consumer<DoubleResult> updater) {
-        Objects.requireNonNull(updater, "callback");
+        if (updater == null) {
+          throw new NullPointerException("callback");
+        }
         return this;
       }
 
@@ -458,7 +506,9 @@ final class DefaultMeter implements Meter {
 
       @Override
       public NoopBuilder setUpdater(Consumer<LongResult> updater) {
-        Objects.requireNonNull(updater, "callback");
+        if (updater == null) {
+          throw new NullPointerException("callback");
+        }
         return this;
       }
 
@@ -485,7 +535,9 @@ final class DefaultMeter implements Meter {
 
       @Override
       public DoubleUpDownSumObserverBuilder setUpdater(Consumer<DoubleResult> updater) {
-        Objects.requireNonNull(updater, "callback");
+        if (updater == null) {
+          throw new NullPointerException("callback");
+        }
         return this;
       }
 
@@ -512,7 +564,9 @@ final class DefaultMeter implements Meter {
 
       @Override
       public LongUpDownSumObserverBuilder setUpdater(Consumer<LongResult> updater) {
-        Objects.requireNonNull(updater, "callback");
+        if (updater == null) {
+          throw new NullPointerException("callback");
+        }
         return this;
       }
 
@@ -539,7 +593,9 @@ final class DefaultMeter implements Meter {
 
       @Override
       public DoubleValueObserverBuilder setUpdater(Consumer<DoubleResult> updater) {
-        Objects.requireNonNull(updater, "callback");
+        if (updater == null) {
+          throw new NullPointerException("callback");
+        }
         return this;
       }
 
@@ -566,7 +622,9 @@ final class DefaultMeter implements Meter {
 
       @Override
       public LongValueObserverBuilder setUpdater(Consumer<LongResult> updater) {
-        Objects.requireNonNull(updater, "callback");
+        if (updater == null) {
+          throw new NullPointerException("callback");
+        }
         return this;
       }
 
@@ -583,39 +641,51 @@ final class DefaultMeter implements Meter {
 
     @Override
     public BatchRecorder put(LongValueRecorder valueRecorder, long value) {
-      Objects.requireNonNull(valueRecorder, "valueRecorder");
+      if (valueRecorder == null) {
+        throw new NullPointerException("valueRecorder");
+      }
       return this;
     }
 
     @Override
     public BatchRecorder put(DoubleValueRecorder valueRecorder, double value) {
-      Objects.requireNonNull(valueRecorder, "valueRecorder");
+      if (valueRecorder == null) {
+        throw new NullPointerException("valueRecorder");
+      }
       return this;
     }
 
     @Override
     public BatchRecorder put(LongCounter counter, long value) {
-      Objects.requireNonNull(counter, "counter");
+      if (counter == null) {
+        throw new NullPointerException("counter");
+      }
       Utils.checkArgument(value >= 0, COUNTERS_CAN_ONLY_INCREASE);
       return this;
     }
 
     @Override
     public BatchRecorder put(DoubleCounter counter, double value) {
-      Objects.requireNonNull(counter, "counter");
+      if (counter == null) {
+        throw new NullPointerException("counter");
+      }
       Utils.checkArgument(value >= 0.0, COUNTERS_CAN_ONLY_INCREASE);
       return this;
     }
 
     @Override
     public BatchRecorder put(LongUpDownCounter upDownCounter, long value) {
-      Objects.requireNonNull(upDownCounter, "upDownCounter");
+      if (upDownCounter == null) {
+        throw new NullPointerException("upDownCounter");
+      }
       return this;
     }
 
     @Override
     public BatchRecorder put(DoubleUpDownCounter upDownCounter, double value) {
-      Objects.requireNonNull(upDownCounter, "upDownCounter");
+      if (upDownCounter == null) {
+        throw new NullPointerException("upDownCounter");
+      }
       return this;
     }
 
@@ -629,13 +699,17 @@ final class DefaultMeter implements Meter {
 
     @Override
     public B setDescription(String description) {
-      Objects.requireNonNull(description, "description");
+      if (description == null) {
+        throw new NullPointerException("description");
+      }
       return getThis();
     }
 
     @Override
     public B setUnit(String unit) {
-      Objects.requireNonNull(unit, "unit");
+      if (unit == null) {
+        throw new NullPointerException("unit");
+      }
       return getThis();
     }
 
@@ -655,7 +729,9 @@ final class DefaultMeter implements Meter {
         "You must provide an even number of key/value pair arguments.");
     for (int i = 0; i < keyValuePairs.length; i += 2) {
       String key = keyValuePairs[i];
-      Objects.requireNonNull(key, "You cannot provide null keys for label creation.");
+      if (key == null) {
+        throw new NullPointerException("You cannot provide null keys for label creation.");
+      }
     }
   }
 }

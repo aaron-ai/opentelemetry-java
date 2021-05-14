@@ -9,7 +9,7 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.resources.Resource;
 
-final class MinMaxSumCountAggregatorFactory implements AggregatorFactory {
+final class MinMaxSumCountAggregatorFactory extends AggregatorFactory {
   static final AggregatorFactory INSTANCE = new MinMaxSumCountAggregatorFactory();
 
   private MinMaxSumCountAggregatorFactory() {}

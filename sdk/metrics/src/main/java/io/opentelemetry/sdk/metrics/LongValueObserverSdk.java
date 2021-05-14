@@ -7,6 +7,7 @@ package io.opentelemetry.sdk.metrics;
 
 import io.opentelemetry.api.metrics.LongValueObserver;
 import io.opentelemetry.api.metrics.LongValueObserverBuilder;
+import io.opentelemetry.sdk.metrics.common.BiFunction;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
@@ -42,7 +43,14 @@ final class LongValueObserverSdk extends AbstractAsynchronousInstrument
 
     @Override
     public LongValueObserverSdk build() {
-      return buildInstrument(LongValueObserverSdk::new);
+      return buildInstrument(
+          new BiFunction<InstrumentDescriptor, AsynchronousInstrumentAccumulator, LongValueObserverSdk>() {
+            @Override
+            public LongValueObserverSdk apply(InstrumentDescriptor instrumentDescriptor,
+                AsynchronousInstrumentAccumulator asynchronousInstrumentAccumulator) {
+              return new LongValueObserverSdk(instrumentDescriptor, asynchronousInstrumentAccumulator);
+            }
+          });
     }
   }
 }

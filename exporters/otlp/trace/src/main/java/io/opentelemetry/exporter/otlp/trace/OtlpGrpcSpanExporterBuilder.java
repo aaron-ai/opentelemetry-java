@@ -7,7 +7,6 @@ package io.opentelemetry.exporter.otlp.trace;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 import static io.opentelemetry.api.internal.Utils.checkArgument;
-import static java.util.Objects.requireNonNull;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -18,7 +17,6 @@ import io.grpc.stub.MetadataUtils;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
@@ -53,7 +51,9 @@ public final class OtlpGrpcSpanExporterBuilder {
    * unset, defaults to {@value DEFAULT_TIMEOUT_SECS}s.
    */
   public OtlpGrpcSpanExporterBuilder setTimeout(long timeout, TimeUnit unit) {
-    requireNonNull(unit, "unit");
+    if (unit == null) {
+      throw new NullPointerException("unit");
+    }
     checkArgument(timeout >= 0, "timeout must be non-negative");
     timeoutNanos = unit.toNanos(timeout);
     return this;
@@ -63,17 +63,20 @@ public final class OtlpGrpcSpanExporterBuilder {
    * Sets the maximum time to wait for the collector to process an exported batch of spans. If
    * unset, defaults to {@value DEFAULT_TIMEOUT_SECS}s.
    */
-  public OtlpGrpcSpanExporterBuilder setTimeout(Duration timeout) {
-    requireNonNull(timeout, "timeout");
-    return setTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS);
-  }
+  // Block for Java 6
+//  public OtlpGrpcSpanExporterBuilder setTimeout(Duration timeout) {
+//    requireNonNull(timeout, "timeout");
+//    return setTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS);
+//  }
 
   /**
    * Sets the OTLP endpoint to connect to. If unset, defaults to {@value DEFAULT_ENDPOINT_URL}. The
    * endpoint must start with either http:// or https://.
    */
   public OtlpGrpcSpanExporterBuilder setEndpoint(String endpoint) {
-    requireNonNull(endpoint, "endpoint");
+    if (endpoint == null) {
+      throw new NullPointerException("endpoint");
+    }
 
     URI uri;
     try {
@@ -151,7 +154,12 @@ public final class OtlpGrpcSpanExporterBuilder {
                 GrpcSslContexts.forClient()
                     .trustManager(new ByteArrayInputStream(trustedCertificatesPem))
                     .build());
-          } catch (IllegalArgumentException | SSLException e) {
+          } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(
+                "Could not set trusted certificates for gRPC TLS connection, are they valid "
+                    + "X.509 in PEM format?",
+                e);
+          } catch (SSLException e) {
             throw new IllegalStateException(
                 "Could not set trusted certificates for gRPC TLS connection, are they valid "
                     + "X.509 in PEM format?",
@@ -168,7 +176,12 @@ public final class OtlpGrpcSpanExporterBuilder {
                 io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts.forClient()
                     .trustManager(new ByteArrayInputStream(trustedCertificatesPem))
                     .build());
-          } catch (IllegalArgumentException | SSLException e) {
+          } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(
+                "Could not set trusted certificates for gRPC TLS connection, are they valid "
+                    + "X.509 in PEM format?",
+                e);
+          } catch (SSLException e) {
             throw new IllegalStateException(
                 "Could not set trusted certificates for gRPC TLS connection, are they valid "
                     + "X.509 in PEM format?",

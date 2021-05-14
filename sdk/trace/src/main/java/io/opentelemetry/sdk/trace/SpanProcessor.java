@@ -8,7 +8,6 @@ package io.opentelemetry.sdk.trace;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,13 +19,13 @@ import javax.annotation.concurrent.ThreadSafe;
  * {@code Span} is started or when a {@code Span} is ended.
  */
 @ThreadSafe
-public interface SpanProcessor extends Closeable {
+public abstract class SpanProcessor {
 
   /**
    * Returns a {@link SpanProcessor} which simply delegates all processing to the {@code processors}
    * in order.
    */
-  static SpanProcessor composite(SpanProcessor... processors) {
+  public static SpanProcessor composite(SpanProcessor... processors) {
     return composite(Arrays.asList(processors));
   }
 
@@ -34,8 +33,8 @@ public interface SpanProcessor extends Closeable {
    * Returns a {@link SpanProcessor} which simply delegates all processing to the {@code processors}
    * in order.
    */
-  static SpanProcessor composite(Iterable<SpanProcessor> processors) {
-    List<SpanProcessor> processorsList = new ArrayList<>();
+  public static SpanProcessor composite(Iterable<SpanProcessor> processors) {
+    List<SpanProcessor> processorsList = new ArrayList<SpanProcessor>();
     for (SpanProcessor processor : processors) {
       processorsList.add(processor);
     }
@@ -58,14 +57,14 @@ public interface SpanProcessor extends Closeable {
    * @param parentContext the parent {@code Context} of the span that just started.
    * @param span the {@code ReadableSpan} that just started.
    */
-  void onStart(Context parentContext, ReadWriteSpan span);
+  public abstract void onStart(Context parentContext, ReadWriteSpan span);
 
   /**
    * Returns {@code true} if this {@link SpanProcessor} requires start events.
    *
    * @return {@code true} if this {@link SpanProcessor} requires start events.
    */
-  boolean isStartRequired();
+  public abstract boolean isStartRequired();
 
   /**
    * Called when a {@link io.opentelemetry.api.trace.Span} is ended, if the {@link
@@ -76,21 +75,21 @@ public interface SpanProcessor extends Closeable {
    *
    * @param span the {@code ReadableSpan} that just ended.
    */
-  void onEnd(ReadableSpan span);
+  public abstract void onEnd(ReadableSpan span);
 
   /**
    * Returns {@code true} if this {@link SpanProcessor} requires end events.
    *
    * @return {@code true} if this {@link SpanProcessor} requires end events.
    */
-  boolean isEndRequired();
+  public abstract boolean isEndRequired();
 
   /**
    * Processes all span events that have not yet been processed and closes used resources.
    *
    * @return a {@link CompletableResultCode} which completes when shutdown is finished.
    */
-  default CompletableResultCode shutdown() {
+  public CompletableResultCode shutdown() {
     return forceFlush();
   }
 
@@ -100,7 +99,7 @@ public interface SpanProcessor extends Closeable {
    * @return a {@link CompletableResultCode} which completes when currently queued spans are
    *     finished processing.
    */
-  default CompletableResultCode forceFlush() {
+  public CompletableResultCode forceFlush() {
     return CompletableResultCode.ofSuccess();
   }
 
@@ -108,8 +107,7 @@ public interface SpanProcessor extends Closeable {
    * Closes this {@link SpanProcessor} after processing any remaining spans, releasing any
    * resources.
    */
-  @Override
-  default void close() {
+  public void close() {
     shutdown().join(10, TimeUnit.SECONDS);
   }
 }

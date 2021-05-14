@@ -5,8 +5,6 @@
 
 package io.opentelemetry.sdk.trace.samplers;
 
-import static java.util.Objects.requireNonNull;
-
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
@@ -20,7 +18,7 @@ import javax.annotation.concurrent.Immutable;
  * Attributes, List)}.
  */
 @Immutable
-public interface SamplingResult {
+public abstract class SamplingResult {
 
   /**
    * Returns a {@link SamplingResult} with no attributes and {@link SamplingResult#getDecision()}
@@ -33,7 +31,7 @@ public interface SamplingResult {
    * @param decision The decision made on the span.
    * @return A {@link SamplingResult} with empty attributes and the provided {@code decision}.
    */
-  static SamplingResult create(SamplingDecision decision) {
+  public static SamplingResult create(SamplingDecision decision) {
     switch (decision) {
       case RECORD_AND_SAMPLE:
         return ImmutableSamplingResult.EMPTY_RECORDED_AND_SAMPLED_SAMPLING_RESULT;
@@ -60,8 +58,10 @@ public interface SamplingResult {
    * @return A {@link SamplingResult} with the attributes equivalent to {@code attributes} and the
    *     provided {@code decision}.
    */
-  static SamplingResult create(SamplingDecision decision, Attributes attributes) {
-    requireNonNull(attributes, "attributes");
+  public static SamplingResult create(SamplingDecision decision, Attributes attributes) {
+    if (attributes == null) {
+      throw new NullPointerException("attributes");
+    }
     return attributes.isEmpty()
         ? create(decision)
         : ImmutableSamplingResult.createSamplingResult(decision, attributes);
@@ -72,7 +72,7 @@ public interface SamplingResult {
    *
    * @return sampling result.
    */
-  SamplingDecision getDecision();
+  public abstract SamplingDecision getDecision();
 
   /**
    * Return tags which will be attached to the span.
@@ -81,7 +81,7 @@ public interface SamplingResult {
    *     {@linkplain #getDecision() the sampling decision} is {@link SamplingDecision#RECORD_ONLY}
    *     or {@link SamplingDecision#RECORD_AND_SAMPLE}.
    */
-  Attributes getAttributes();
+  public abstract Attributes getAttributes();
 
   /**
    * Return an optionally-updated {@link TraceState}, based on the parent TraceState. This may
@@ -92,7 +92,7 @@ public interface SamplingResult {
    *     SpanContext} parameter on the {@link Sampler#shouldSample(Context, String, String,
    *     SpanKind, Attributes, List)} call.
    */
-  default TraceState getUpdatedTraceState(TraceState parentTraceState) {
+  public TraceState getUpdatedTraceState(TraceState parentTraceState) {
     return parentTraceState;
   }
 }

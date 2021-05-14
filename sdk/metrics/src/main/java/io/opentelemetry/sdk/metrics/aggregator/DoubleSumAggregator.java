@@ -5,6 +5,7 @@
 
 package io.opentelemetry.sdk.metrics.aggregator;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
@@ -13,7 +14,6 @@ import io.opentelemetry.sdk.metrics.data.DoubleSumData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Map;
-import java.util.concurrent.atomic.DoubleAdder;
 
 final class DoubleSumAggregator extends AbstractSumAggregator<Double> {
   DoubleSumAggregator(
@@ -68,16 +68,17 @@ final class DoubleSumAggregator extends AbstractSumAggregator<Double> {
   }
 
   static final class Handle extends AggregatorHandle<Double> {
-    private final DoubleAdder current = new DoubleAdder();
+    private static final double DEFAULT_VALUE = 0.0;
+    private final AtomicDouble current = new AtomicDouble(DEFAULT_VALUE);
 
     @Override
     protected Double doAccumulateThenReset() {
-      return this.current.sumThenReset();
+      return this.current.getAndSet(DEFAULT_VALUE);
     }
 
     @Override
     protected void doRecordDouble(double value) {
-      current.add(value);
+      current.getAndAdd(value);
     }
   }
 }

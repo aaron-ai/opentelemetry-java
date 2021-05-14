@@ -13,8 +13,8 @@ import java.util.List;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-enum AlwaysOnSampler implements Sampler {
-  INSTANCE;
+class AlwaysOnSampler extends Sampler {
+  public static final AlwaysOnSampler INSTANCE = new AlwaysOnSampler();
 
   // Returns a "yes" {@link SamplingResult} on {@link Span} sampling.
   @Override

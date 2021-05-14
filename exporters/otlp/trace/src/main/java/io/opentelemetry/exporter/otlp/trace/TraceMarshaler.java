@@ -524,19 +524,19 @@ final class TraceMarshaler {
 
   private static Map<Resource, Map<InstrumentationLibraryInfo, List<SpanMarshaler>>>
       groupByResourceAndLibrary(Collection<SpanData> spanDataList) {
-    Map<Resource, Map<InstrumentationLibraryInfo, List<SpanMarshaler>>> result = new HashMap<>();
+    Map<Resource, Map<InstrumentationLibraryInfo, List<SpanMarshaler>>> result = new HashMap<Resource, Map<InstrumentationLibraryInfo, List<SpanMarshaler>>>();
     for (SpanData spanData : spanDataList) {
       Resource resource = spanData.getResource();
       Map<InstrumentationLibraryInfo, List<SpanMarshaler>> libraryInfoListMap =
           result.get(spanData.getResource());
       if (libraryInfoListMap == null) {
-        libraryInfoListMap = new HashMap<>();
+        libraryInfoListMap = new HashMap<InstrumentationLibraryInfo, List<SpanMarshaler>>();
         result.put(resource, libraryInfoListMap);
       }
       List<SpanMarshaler> spanList =
           libraryInfoListMap.get(spanData.getInstrumentationLibraryInfo());
       if (spanList == null) {
-        spanList = new ArrayList<>();
+        spanList = new ArrayList<SpanMarshaler>();
         libraryInfoListMap.put(spanData.getInstrumentationLibraryInfo(), spanList);
       }
       spanList.add(SpanMarshaler.create(spanData));

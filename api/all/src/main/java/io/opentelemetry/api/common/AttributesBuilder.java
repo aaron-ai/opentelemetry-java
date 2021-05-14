@@ -18,15 +18,15 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import java.util.Arrays;
 
 /** A builder of {@link Attributes} supporting an arbitrary number of key-value pairs. */
-public interface AttributesBuilder {
+public abstract class AttributesBuilder {
   /** Create the {@link Attributes} from this. */
-  Attributes build();
+  public abstract Attributes build();
 
   /** Puts a {@link AttributeKey} with associated value into this. */
-  <T> AttributesBuilder put(AttributeKey<Long> key, int value);
+  public abstract <T> AttributesBuilder put(AttributeKey<Long> key, int value);
 
   /** Puts a {@link AttributeKey} with associated value into this. */
-  <T> AttributesBuilder put(AttributeKey<T> key, T value);
+  public abstract <T> AttributesBuilder put(AttributeKey<T> key, T value);
 
   /**
    * Puts a String attribute into this.
@@ -36,7 +36,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, String value) {
+  public AttributesBuilder put(String key, String value) {
     return put(stringKey(key), value);
   }
 
@@ -48,7 +48,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, long value) {
+  public AttributesBuilder put(String key, long value) {
     return put(longKey(key), value);
   }
 
@@ -60,7 +60,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, double value) {
+  public AttributesBuilder put(String key, double value) {
     return put(doubleKey(key), value);
   }
 
@@ -72,7 +72,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, boolean value) {
+  public AttributesBuilder put(String key, boolean value) {
     return put(booleanKey(key), value);
   }
 
@@ -84,7 +84,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, String... value) {
+  public AttributesBuilder put(String key, String... value) {
     return put(stringArrayKey(key), value == null ? null : Arrays.asList(value));
   }
 
@@ -96,7 +96,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, long... value) {
+  public AttributesBuilder put(String key, long... value) {
     return put(longArrayKey(key), toList(value));
   }
 
@@ -108,7 +108,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, double... value) {
+  public AttributesBuilder put(String key, double... value) {
     return put(doubleArrayKey(key), toList(value));
   }
 
@@ -120,7 +120,7 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  default AttributesBuilder put(String key, boolean... value) {
+  public AttributesBuilder put(String key, boolean... value) {
     return put(booleanArrayKey(key), toList(value));
   }
 
@@ -129,5 +129,5 @@ public interface AttributesBuilder {
    *
    * @return this Builder
    */
-  AttributesBuilder putAll(Attributes attributes);
+  public abstract AttributesBuilder putAll(Attributes attributes);
 }

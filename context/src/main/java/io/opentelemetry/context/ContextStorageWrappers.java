@@ -7,7 +7,6 @@ package io.opentelemetry.context;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +21,7 @@ final class ContextStorageWrappers {
   private static boolean storageInitialized;
 
   private static final List<Function<? super ContextStorage, ? extends ContextStorage>> wrappers =
-      new ArrayList<>();
+      new ArrayList<Function<? super ContextStorage, ? extends ContextStorage>>();
 
   private static final Object mutex = new Object();
 

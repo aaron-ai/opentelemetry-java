@@ -123,6 +123,9 @@ subprojects {
                 languageVersion.set(JavaLanguageVersion.of(11))
             }
 
+            sourceCompatibility = JavaVersion.VERSION_1_6
+            targetCompatibility = JavaVersion.VERSION_1_6
+
             withJavadocJar()
             withSourcesJar()
         }
@@ -159,7 +162,8 @@ subprojects {
             }
 
             withType(JavaCompile::class) {
-                options.release.set(8)
+                options.release.set(6)
+                exclude("io/opentelemetry/sdk/testing/**")
 
                 if (name != "jmhCompileGeneratedClasses") {
                     options.compilerArgs.addAll(listOf(
@@ -249,6 +253,7 @@ subprojects {
 
             withType(Javadoc::class) {
                 exclude("io/opentelemetry/**/internal/**")
+                exclude("io/opentelemetry/sdk/testing/**")
 
                 with(options as StandardJavadocDocletOptions) {
                     source = "8"

@@ -10,7 +10,7 @@ package io.opentelemetry.api.baggage;
  *
  * @see Baggage#builder()
  */
-public interface BaggageBuilder {
+public abstract class BaggageBuilder {
 
   /**
    * Adds the key/value pair and metadata regardless of whether the key is present.
@@ -20,7 +20,7 @@ public interface BaggageBuilder {
    * @param entryMetadata the {@code BaggageEntryMetadata} metadata to set for the given key.
    * @return this
    */
-  BaggageBuilder put(String key, String value, BaggageEntryMetadata entryMetadata);
+  public abstract BaggageBuilder put(String key, String value, BaggageEntryMetadata entryMetadata);
 
   /**
    * Adds the key/value pair with empty metadata regardless of whether the key is present.
@@ -29,7 +29,7 @@ public interface BaggageBuilder {
    * @param value the {@code String} value to set for the given key.
    * @return this
    */
-  default BaggageBuilder put(String key, String value) {
+  public BaggageBuilder put(String key, String value) {
     return put(key, value, BaggageEntryMetadata.empty());
   }
 
@@ -39,12 +39,12 @@ public interface BaggageBuilder {
    * @param key the {@code String} key which will be removed.
    * @return this
    */
-  BaggageBuilder remove(String key);
+  public abstract BaggageBuilder remove(String key);
 
   /**
    * Creates a {@code Baggage} from this builder.
    *
    * @return a {@code Baggage} with the same entries as this builder.
    */
-  Baggage build();
+  public abstract Baggage build();
 }

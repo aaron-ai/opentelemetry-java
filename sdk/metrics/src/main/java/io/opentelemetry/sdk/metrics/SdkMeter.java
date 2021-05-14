@@ -97,7 +97,7 @@ final class SdkMeter implements Meter {
   Collection<MetricData> collectAll(long epochNanos) {
     InstrumentRegistry instrumentRegistry = meterSharedState.getInstrumentRegistry();
     Collection<AbstractInstrument> instruments = instrumentRegistry.getInstruments();
-    List<MetricData> result = new ArrayList<>(instruments.size());
+    List<MetricData> result = new ArrayList<MetricData>(instruments.size());
     for (AbstractInstrument instrument : instruments) {
       result.addAll(instrument.collectAll(epochNanos));
     }

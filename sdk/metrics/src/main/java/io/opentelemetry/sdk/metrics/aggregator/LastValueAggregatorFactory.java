@@ -9,7 +9,7 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.common.InstrumentDescriptor;
 import io.opentelemetry.sdk.resources.Resource;
 
-final class LastValueAggregatorFactory implements AggregatorFactory {
+final class LastValueAggregatorFactory extends AggregatorFactory {
   static final AggregatorFactory INSTANCE = new LastValueAggregatorFactory();
 
   private LastValueAggregatorFactory() {}

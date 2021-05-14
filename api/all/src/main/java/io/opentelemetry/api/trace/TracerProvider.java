@@ -14,13 +14,13 @@ import javax.annotation.concurrent.ThreadSafe;
  * @see Tracer
  */
 @ThreadSafe
-public interface TracerProvider {
+public abstract class TracerProvider {
 
   /**
    * Returns a no-op {@link TracerProvider} which only creates no-op {@link Span}s which do not
    * record nor are emitted.
    */
-  static TracerProvider noop() {
+  public static TracerProvider noop() {
     return DefaultTracerProvider.getInstance();
   }
 
@@ -33,7 +33,7 @@ public interface TracerProvider {
    *     name.
    * @return a tracer instance.
    */
-  Tracer get(String instrumentationName);
+  public abstract Tracer get(String instrumentationName);
 
   /**
    * Gets or creates a named and versioned tracer instance.
@@ -45,5 +45,5 @@ public interface TracerProvider {
    * @param instrumentationVersion The version of the instrumentation library (e.g., "1.0.0").
    * @return a tracer instance.
    */
-  Tracer get(String instrumentationName, String instrumentationVersion);
+  public abstract Tracer get(String instrumentationName, String instrumentationVersion);
 }

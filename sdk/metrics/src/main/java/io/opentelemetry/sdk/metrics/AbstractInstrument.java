@@ -14,7 +14,6 @@ import io.opentelemetry.sdk.metrics.common.InstrumentType;
 import io.opentelemetry.sdk.metrics.common.InstrumentValueType;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.util.List;
-import java.util.Objects;
 
 abstract class AbstractInstrument implements Instrument {
 
@@ -63,11 +62,13 @@ abstract class AbstractInstrument implements Instrument {
     private final String name;
     private final InstrumentType instrumentType;
     private final InstrumentValueType instrumentValueType;
-    private String description = "";
-    private String unit = "1";
+    private static final String description = "";
+    private static final String unit = "1";
 
     Builder(String name, InstrumentType instrumentType, InstrumentValueType instrumentValueType) {
-      Objects.requireNonNull(name, "name");
+      if (name == null) {
+        throw new NullPointerException("name");
+      }
       Utils.checkArgument(MetricsStringUtils.isValidMetricName(name), ERROR_MESSAGE_INVALID_NAME);
       this.name = name;
       this.instrumentType = instrumentType;
@@ -76,13 +77,17 @@ abstract class AbstractInstrument implements Instrument {
 
     @Override
     public final B setDescription(String description) {
-      this.description = Objects.requireNonNull(description, "description");
+      if (description == null) {
+        throw new NullPointerException("description");
+      }
       return getThis();
     }
 
     @Override
     public final B setUnit(String unit) {
-      this.unit = Objects.requireNonNull(unit, "unit");
+      if (unit == null) {
+        throw new NullPointerException("unit");
+      }
       return getThis();
     }
 

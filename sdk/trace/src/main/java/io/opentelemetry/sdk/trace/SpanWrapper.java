@@ -30,7 +30,7 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 @AutoValue
-abstract class SpanWrapper implements SpanData {
+abstract class SpanWrapper extends SpanData {
   abstract RecordEventsReadableSpan delegate();
 
   abstract List<LinkData> resolvedLinks();
