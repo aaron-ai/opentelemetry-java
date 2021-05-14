@@ -104,6 +104,7 @@ nexusStaging {
 
 subprojects {
     group = "io.opentelemetry"
+    project.version = "1.2.0-rocketmq"
 
     plugins.withId("java") {
         plugins.apply("checkstyle")
